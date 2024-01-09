@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract MyNFTV2 is
+contract FanslandNFT is
     Initializable,
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
@@ -149,7 +149,7 @@ contract MyNFTV2 is
         emit UriChanged();
     }
 
-        /// @dev This method should be invoked from WEB3 from owner's account to PAUSE the smart contract
+    /// @dev This method should be invoked from WEB3 from owner's account to PAUSE the smart contract
     function pause() public onlyOwner {
         _pause();
     }
@@ -198,6 +198,11 @@ contract MyNFTV2 is
     /// @dev This method should be invoked from WEB3 for getting current sale active status
     function isSaleActive() public view returns (bool) {
         return _isSaleActive;
+    }
+
+    /// @dev set token price
+    function setPricePerToken(uint256 price) public onlyOwner {
+        _pricePerToken = price;
     }
 
     /// @dev Method for getting price required for minting per NFT token
