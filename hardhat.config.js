@@ -1,13 +1,19 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@openzeppelin/hardhat-upgrades");
+require('dotenv').config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-        
     },
+    mumbai: {
+        url: "https://rpc-mumbai.maticvigil.com",
+        chainId: 80001,
+        accounts: [process.env.MUMBAI_PRIVATE_KEY]
+        // accounts: ["0xb5af422ef45bac10aa74cef3ba13c191586e0e8ada5c9e061e4c65566efcacae"]
+    }
   },
   solidity: {
     version: "0.8.20",

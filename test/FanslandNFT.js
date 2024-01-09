@@ -48,6 +48,8 @@ describe("FanslandNFT", function () {
 
   // Contract initialisation function, should be called once in a test's lifetime
   async function initContract() {
+    console.log("===============", process.env.MUMBAI_PRIVATE_KEY)
+
     [owner, alice, bob, john, shane] = await ethers.getSigners();
     accounts = [owner, alice, bob, john, shane];
 
