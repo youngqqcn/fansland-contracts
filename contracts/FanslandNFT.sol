@@ -24,11 +24,11 @@ contract FanslandNFT is
     // using Math for uint256;
 
     // Contract private variables
-    uint256 private _tokenIdCounter;
-    bool private _isSaleActive;
-    uint256 private _pricePerToken;
-    uint256 private _maxSupply;
-    string private _baseTokenURI;
+    uint256 public tokenIdCounter;
+    bool public isSaleActive;
+    uint256 public nftPrice;
+    uint256 public maxSupply;
+    string public baseURI;
 
     /**
      * @dev Emitted when the base URI is changed.
@@ -54,25 +54,25 @@ contract FanslandNFT is
         __Ownable_init(msg.sender);
         __ERC721Burnable_init();
 
-        _isSaleActive = true;
-        _baseTokenURI = baseTokenURI;
-        _maxSupply = maxTokenSupply;
-        _pricePerToken = tokenPrice;
+        isSaleActive = true;
+        baseURI = baseTokenURI;
+        maxSupply = maxTokenSupply;
+        nftPrice = tokenPrice;
     }
 
     /// @dev This method should be invoked from WEB3 for minting a new NFT
     function safeMint() public payable {
-        uint256 tokenId = _tokenIdCounter;
+        uint256 tokenId = tokenIdCounter;
 
-        require(_isSaleActive, "Sale must be active to mint NFT");
+        require(isSaleActive, "Sale must be active to mint NFT");
         require(
-            tokenId + 1 <= _maxSupply,
+            tokenId + 1 <= maxSupply,
             "Purchase would exceed max supply of NFTs"
         );
-        require(_pricePerToken <= msg.value, "Ether value sent is not correct");
+        require(nftPrice <= msg.value, "Ether value sent is not correct");
 
         //  (bool overflowsAdd,  uint256  tokenId) =  _tokenIdCounter.tryAdd(1);
-        _tokenIdCounter += 1;
+        tokenIdCounter += 1;
         _safeMint(msg.sender, tokenId);
     }
 
@@ -139,7 +139,7 @@ contract FanslandNFT is
         }
     }
 
-    /// @dev This is a V2 method which allows owner to withdraw ethers
+    /// @dev allows owner to withdraw ethers
     function withdraw() public onlyOwner {
         uint balance = address(this).balance;
         payable(owner()).transfer(balance);
@@ -148,13 +148,13 @@ contract FanslandNFT is
     /// @param isActive Sale status param.
     /// @dev This method should be invoked from WEB3 for setting sale active status
     function setSaleActive(bool isActive) public onlyOwner {
-        _isSaleActive = isActive;
+        isSaleActive = isActive;
     }
 
     /// @param newBaseTokenURI New base token URI.
     /// @dev This method should be invoked from WEB3 for setting base token URI
     function setBaseURI(string memory newBaseTokenURI) public onlyOwner {
-        _baseTokenURI = newBaseTokenURI;
+        baseURI = newBaseTokenURI;
         emit UriChanged();
     }
 
@@ -167,12 +167,6 @@ contract FanslandNFT is
     function unpause() public onlyOwner {
         _unpause();
     }
-
-    // The following functions are overrides required by Solidity.
-
-    // function _burn(uint256 tokenId) internal override {
-    //     super._burn(tokenId);
-    // }
 
     function tokenURI(
         uint256 tokenId
@@ -201,31 +195,11 @@ contract FanslandNFT is
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
-    }
-
-    /// @dev This method should be invoked from WEB3 for getting current sale active status
-    function isSaleActive() public view returns (bool) {
-        return _isSaleActive;
+        return baseURI;
     }
 
     /// @dev set token price
-    function setPricePerToken(uint256 price) public onlyOwner {
-        _pricePerToken = price;
-    }
-
-    /// @dev Method for getting price required for minting per NFT token
-    function pricePerToken() public view returns (uint256) {
-        return _pricePerToken;
-    }
-
-    /// @dev Method for getting max supply count
-    function maxSupply() public view returns (uint256) {
-        return _maxSupply;
-    }
-
-    /// @dev Method for getting base URI for tokens
-    function baseURI() public view returns (string memory) {
-        return _baseTokenURI;
+    function setNftPrice (uint256 price) public onlyOwner {
+        nftPrice = price;
     }
 }

@@ -50,6 +50,8 @@ describe("FanslandNFT", function () {
   async function initContract() {
     console.log("===============", process.env.MUMBAI_PRIVATE_KEY)
 
+    console.log( "signers = ", await ethers.getSigners());
+
     [owner, alice, bob, john, shane] = await ethers.getSigners();
     accounts = [owner, alice, bob, john, shane];
 
@@ -99,8 +101,7 @@ describe("FanslandNFT", function () {
       });
 
       it("has each NFT price set to 0.001 ether", async () => {
-        let price = await token.pricePerToken();
-        // console.debug("pricePerToken = ", price);
+        let price = await token.nftPrice();
         expect(fromWei(new BN(price))).to.equal(NFT_PRICE);
       });
     });
