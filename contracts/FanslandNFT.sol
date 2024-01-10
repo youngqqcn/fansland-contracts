@@ -41,13 +41,8 @@ contract FanslandNFT is
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function initialize(
-        string memory nftName,
-        string memory nftSymbol,
-        string memory baseTokenURI,
-        uint256 maxTokenSupply,
-        uint256 tokenPrice
     ) public initializer {
-        __ERC721_init(nftName, nftSymbol);
+        __ERC721_init("Fansland", "Fansland");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __Pausable_init();
@@ -55,9 +50,9 @@ contract FanslandNFT is
         __ERC721Burnable_init();
 
         isSaleActive = true;
-        baseURI = baseTokenURI;
-        maxSupply = maxTokenSupply;
-        nftPrice = tokenPrice;
+        baseURI = "ipfs://QmWiQE65tmpYzcokCheQmng2DCM33DEhjXcPB6PanwpAZo/";
+        maxSupply = 100000;
+        nftPrice = 0;
     }
 
     /// @dev This method should be invoked from WEB3 for minting a new NFT
