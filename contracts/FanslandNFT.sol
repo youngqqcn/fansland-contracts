@@ -76,6 +76,15 @@ contract FanslandNFT is
         _safeMint(msg.sender, tokenId);
     }
 
+
+    /// @dev  TODO
+    function batchMint() public payable {
+        // TODO imple batch mint
+    }
+
+
+    /// @param account account
+    /// @param value value
     function _increaseBalance(
         address account,
         uint128 value
