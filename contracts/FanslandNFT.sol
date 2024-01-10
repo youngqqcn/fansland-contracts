@@ -35,13 +35,14 @@ contract FanslandNFT is
      */
     event UriChanged();
 
+    error SaleNotActive();
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function initialize(
-    ) public initializer {
+    function initialize() public initializer {
         __ERC721_init("Fansland", "Fansland");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
@@ -55,28 +56,53 @@ contract FanslandNFT is
         nftPrice = 0;
     }
 
-    /// @dev This method should be invoked from WEB3 for minting a new NFT
-    function safeMint() public payable {
-        uint256 tokenId = tokenIdCounter;
+    modifier whenSaleActive() {
+        // require(isSaleActive, "Sale must be active to mint NFT");
+        if (!isSaleActive) {
+            revert SaleNotActive();
+        }
+        _;
+    }
 
-        require(isSaleActive, "Sale must be active to mint NFT");
+    /// @dev This method should be invoked from web3 for minting a new NFT
+    function mint() public payable whenNotPaused whenSaleActive {
+        _mintNFT(msg.sender, 1);
+    }
+
+    /// @dev batch mint
+    function mintBatch(
+        address to,
+        uint256 quantity
+    ) public payable whenNotPaused whenSaleActive {
+        _mintNFT(to, quantity);
+    }
+
+    /// @dev  batch mint
+    function _mintNFT(address to, uint256 quantity) internal {
+        uint256 tokenId = tokenIdCounter;
+        (bool overflowsAdd, uint256 resultAdd) = Math.tryAdd(tokenId, quantity);
         require(
-            tokenId + 1 <= maxSupply,
+            !overflowsAdd && resultAdd <= maxSupply,
             "Purchase would exceed max supply of NFTs"
         );
-        require(nftPrice <= msg.value, "Ether value sent is not correct");
 
-        //  (bool overflowsAdd,  uint256  tokenId) =  _tokenIdCounter.tryAdd(1);
-        tokenIdCounter += 1;
-        _safeMint(msg.sender, tokenId);
+        (bool overflowsMul, uint256 resultAmount) = Math.tryMul(
+            nftPrice,
+            quantity
+        );
+        require(
+            !overflowsMul && resultAmount <= msg.value,
+            "Ether value sent is not correct"
+        );
+        for (uint i = 0; i < quantity; i++) {
+            _mint(to, tokenId + i);
+        }
+        tokenIdCounter += quantity;
+
+
+        // TODO:
+        // _setTokenURI(1, "TODO");
     }
-
-
-    /// @dev  TODO
-    function batchMint() public payable {
-        // TODO imple batch mint
-    }
-
 
     /// @param account account
     /// @param value value
@@ -194,7 +220,7 @@ contract FanslandNFT is
     }
 
     /// @dev set token price
-    function setNftPrice (uint256 price) public onlyOwner {
+    function setNftPrice(uint256 price) public onlyOwner {
         nftPrice = price;
     }
 }
