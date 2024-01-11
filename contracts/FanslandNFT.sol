@@ -37,6 +37,7 @@ contract FanslandNFT is
         string name; // type name
         string uri; // uri
         uint256 maxSupply; // maxsupply
+        uint256 totalSupply; // totalSupply
         uint256 price; // price
         bool isSaleActive; // sale staus
     }
@@ -65,7 +66,7 @@ contract FanslandNFT is
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function initialize() public initializer {
-        __ERC721_init("Fansland", "Fansland");
+        __ERC721_init("Fansland", "FANS");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __Pausable_init();
@@ -75,7 +76,7 @@ contract FanslandNFT is
         openSale = true;
         baseURI = "ipfs://QmWiQE65tmpYzcokCheQmng2DCM33DEhjXcPB6PanwpAZo/";
         maxSupply = 100000;
-        nftPrice = 0;
+        // nftPrice = 0;
 
         // TODO: init with some data
         nftTypeMap[0] = NftType({
@@ -83,7 +84,8 @@ contract FanslandNFT is
             name: "Fansland first NFT",
             uri: "todo",
             maxSupply: 10000,
-            price: 0,
+            totalSupply: 0,
+            price: 0.001 ether,
             isSaleActive: true
         });
     }
@@ -101,6 +103,7 @@ contract FanslandNFT is
         string calldata typeName,
         string calldata uri,
         uint256 maxsupply,
+        uint256 curSupply,
         uint256 price,
         bool saleActive
     ) public onlyOwner {
@@ -109,6 +112,7 @@ contract FanslandNFT is
             name: typeName,
             uri: uri,
             maxSupply: maxsupply,
+            totalSupply: curSupply,
             price: price,
             isSaleActive: saleActive
         });
@@ -163,6 +167,8 @@ contract FanslandNFT is
             // emit MintNft event
             emit MintNft(address(0), to, curTokenId, typeId);
         }
+
+        tokenIdTypeMap[typeId] += quantity;
         tokenIdCounter += quantity;
     }
 
