@@ -23,6 +23,7 @@ describe("FanslandNFT", function () {
     Paused: "Paused",
     Unpaused: "Unpaused",
     UriChanged: "UriChanged",
+    MintNft: "MintNft",
   };
 
   // User accounts to be used in the test case
@@ -240,11 +241,30 @@ describe("FanslandNFT", function () {
         });
       });
 
+      it("MintNft event", async () => {
+        expectEvent.inTransaction(this.logs, EventNames.MintNft, {
+          from: ZERO_ADDRESS,
+          to: owner,
+          typeId: 0,
+        });
+      });
+
       it("creates the token", async function () {
         const firstTokenId = 0n;
         const ttt = await token.connect(alice);
         expect(await ttt.balanceOf(alice)).to.equal("1");
         expect(await ttt.ownerOf(firstTokenId)).to.equal(alice);
+      });
+    });
+
+    context("mint with wrong typeId ", async () => {
+      it("reverts", async () => {
+        await expectRevert(
+          token.mintBatch([100001], [1], {
+            value: NFT_MINT_PRICE,
+          }),
+          "invalid typeId"
+        );
       });
     });
   });
@@ -389,6 +409,72 @@ describe("FanslandNFT", function () {
             "ERC721NonexistentToken(1)"
           );
         });
+      });
+    });
+  });
+
+  describe("updateNftType()", async () => {
+    it("update nft type", async () => {
+      await token.updateNftType(
+        0,
+        "testname",
+        "testuri",
+        99,
+        1,
+        toWei("1.1", "ether"),
+        false
+      );
+      const t = await token.nftTypeMap(0);
+      expect(t[ID_IDX]).to.equal(0);
+      expect(t[NAME_IDX]).to.equal("testname");
+      expect(t[URI_IDX]).to.equal("testuri");
+      expect(t[MAX_SUPPLY_IDX]).to.equal(99);
+      expect(t[TOTAL_SUPPLY_IDX]).to.equal(1);
+      expect(t[PRICE_IDX]).to.equal(toWei("1.1", "ether"));
+      expect(t[SALE_ACTIVE_IDX]).to.equal(false);
+    });
+    it("add nft type", async () => {
+      await token.updateNftType(
+        1,
+        "testname1",
+        "testuri1",
+        99,
+        1,
+        toWei("1.1", "ether"),
+        true
+      );
+      const t = await token.nftTypeMap(1);
+      expect(t[ID_IDX]).to.equal(1);
+      expect(t[NAME_IDX]).to.equal("testname1");
+      expect(t[URI_IDX]).to.equal("testuri1");
+      expect(t[MAX_SUPPLY_IDX]).to.equal(99);
+      expect(t[TOTAL_SUPPLY_IDX]).to.equal(1);
+      expect(t[PRICE_IDX]).to.equal(toWei("1.1", "ether"));
+      expect(t[SALE_ACTIVE_IDX]).to.equal(true);
+
+      const receipt = await token.mintBatch([0], [1], {
+        value: toWei("1.1", "ether"),
+      });
+      expectEvent.inTransaction(receipt, EventNames.Transfer, {
+        from: ZERO_ADDRESS,
+        to: owner,
+      });
+    });
+
+    it("delete nft type", async () => {
+      await token.removeNftType(0);
+      await token.removeNftType(1);
+
+      expect(await token.typeExists(0)).is.false;
+      expect(await token.typeExists(1)).is.false;
+
+      it("reverts", async () => {
+        await expectRevert(
+          token.mintBatch([0], [1], {
+            value: NFT_MINT_PRICE,
+          }),
+          "invalid typeId"
+        );
       });
     });
   });

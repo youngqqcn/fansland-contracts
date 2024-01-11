@@ -43,6 +43,7 @@ contract FanslandNFT is
     }
 
     mapping(uint256 => NftType) public nftTypeMap;
+    mapping(uint256 => bool) public typeExists;
     mapping(uint256 => uint256) public tokenIdTypeMap;
 
     /**
@@ -57,7 +58,6 @@ contract FanslandNFT is
         uint256 indexed tokenId,
         uint256 typeId
     );
-
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -87,11 +87,12 @@ contract FanslandNFT is
             price: 0.001 ether,
             isSaleActive: true
         });
+        typeExists[0] = true;
     }
 
     modifier whenOpenSale() {
         // if (!openSale) {
-            // revert OpenSaleNotActive();
+        // revert OpenSaleNotActive();
         // }
         require(openSale, "Sale must be active to mint NFT");
 
@@ -117,11 +118,13 @@ contract FanslandNFT is
             price: price,
             isSaleActive: saleActive
         });
+        typeExists[id] = true;
     }
 
     /// @dev delete nft type
     function removeNftType(uint256 id) public onlyOwner {
         delete nftTypeMap[id];
+        typeExists[id] = false;
     }
 
     /// @dev batch mint
@@ -139,8 +142,11 @@ contract FanslandNFT is
 
     /// @dev  batch mint
     function _mintNFT(uint256 typeId, address to, uint256 quantity) internal {
+        require(typeExists[typeId], "invalid typeId");
+
         uint256 tokenId = tokenIdCounter;
         NftType memory nftType = nftTypeMap[typeId];
+
         (bool okAdd, uint256 resultAdd) = Math.tryAdd(tokenId, quantity);
         require(
             okAdd && resultAdd <= nftType.maxSupply,
@@ -266,7 +272,12 @@ contract FanslandNFT is
         override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (string memory)
     {
-        return super.tokenURI(tokenId);
+        if (tokenId > tokenIdCounter) {
+            revert ERC721NonexistentToken(tokenId);
+        }
+
+        return string.concat(baseURI, nftTypeMap[tokenIdTypeMap[tokenId]].uri);
+        // return super.tokenURI(tokenId);
     }
 
     function supportsInterface(
