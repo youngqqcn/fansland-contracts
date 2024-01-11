@@ -149,7 +149,7 @@ describe("FanslandNFT", function () {
     context("when owner tries to pause the contract", function () {
       it("deployer can pause", async function () {
         const receipt = await token.pause({ from: owner });
-        console.log("pause====receipt = ", receipt);
+        // console.log("pause====receipt = ", receipt);
         expectEvent.inTransaction(receipt, EventNames.Paused, {
           account: owner,
         });
@@ -465,7 +465,7 @@ describe("FanslandNFT", function () {
         from: owner,
         value: toWei("0.1", "ether"),
       });
-      console.log("logs========", receipt);
+    //   console.log("logs========", receipt);
 
       // TODO: WTF? why error?
       //   await expectEvent(receipt, EventNames.MintNft, {
