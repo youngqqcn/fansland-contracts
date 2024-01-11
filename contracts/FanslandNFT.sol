@@ -28,6 +28,7 @@ contract FanslandNFT is
     // Contract private variables
     uint256 public tokenIdCounter;
     bool public openSale; // open sale
+    uint256 public nftPrice;
     uint256 public maxSupply;
     string public baseURI;
 
@@ -175,6 +176,7 @@ contract FanslandNFT is
         }
 
         tokenIdTypeMap[typeId] += quantity;
+        nftTypeMap[typeId].totalSupply += quantity;
         tokenIdCounter += quantity;
     }
 
@@ -299,7 +301,7 @@ contract FanslandNFT is
     }
 
     /// @dev set token price
-    // function setNftPrice(uint256 price) public onlyOwner {
-    //     nftPrice = price;
-    // }
+    function setNftPrice(uint256 price) public onlyOwner {
+        nftPrice = price;
+    }
 }
