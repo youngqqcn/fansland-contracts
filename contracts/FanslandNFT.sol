@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -19,6 +20,7 @@ contract FanslandNFT is
     ERC721PausableUpgradeable,
     OwnableUpgradeable,
     ERC721BurnableUpgradeable,
+    ERC721HolderUpgradeable,
     UUPSUpgradeable
 {
     // using Math for uint256;
@@ -30,7 +32,7 @@ contract FanslandNFT is
     uint256 public maxSupply;
     string public baseURI;
 
-    struct nftType {
+    struct NftType {
         uint256 id; // ticket type id
         string name; // type name
         string uri; // uri
@@ -39,13 +41,21 @@ contract FanslandNFT is
         bool isSaleActive; // sale staus
     }
 
-    mapping(uint256 => nftType) public typeMap;
+    mapping(uint256 => NftType) public nftTypeMap;
     mapping(uint256 => uint256) public tokenIdTypeMap;
 
     /**
      * @dev Emitted when the base URI is changed.
      */
     event UriChanged();
+
+    /// @dev Emitted typeId to record
+    event MintNft(
+        address indexed from,
+        address indexed to,
+        uint256 indexed tokenId,
+        uint256 typeId
+    );
 
     error OpenSaleNotActive();
 
@@ -68,7 +78,7 @@ contract FanslandNFT is
         nftPrice = 0;
 
         // TODO: init with some data
-        typeMap[0] = nftType({
+        nftTypeMap[0] = NftType({
             id: 0,
             name: "Fansland first NFT",
             uri: "todo",
@@ -88,13 +98,13 @@ contract FanslandNFT is
     /// @dev update nft type
     function updateNftType(
         uint256 id,
-        string memory typeName,
-        string memory uri,
+        string calldata typeName,
+        string calldata uri,
         uint256 maxsupply,
         uint256 price,
         bool saleActive
     ) public onlyOwner {
-        typeMap[id] = nftType({
+        nftTypeMap[id] = NftType({
             id: id,
             name: typeName,
             uri: uri,
@@ -106,33 +116,34 @@ contract FanslandNFT is
 
     /// @dev delete nft type
     function removeNftType(uint256 id) public onlyOwner {
-        delete typeMap[id];
-    }
-
-    /// @dev This method should be invoked from web3 for minting a new NFT
-    function mint() public payable whenNotPaused whenOpenSale {
-        _mintNFT(msg.sender, 1);
+        delete nftTypeMap[id];
     }
 
     /// @dev batch mint
+    /// @param typeIds  nft types
+    /// @param quantities quantitys
     function mintBatch(
-        address to,
-        uint256 quantity
+        uint256[] calldata typeIds,
+        uint256[] calldata quantities
     ) public payable whenNotPaused whenOpenSale {
-        _mintNFT(to, quantity);
+        require(typeIds.length == quantities.length, "args length not match");
+        for (uint i = 0; i < typeIds.length; i++) {
+            _mintNFT(typeIds[i], _msgSender(), quantities[i]);
+        }
     }
 
     /// @dev  batch mint
-    function _mintNFT(address to, uint256 quantity) internal {
+    function _mintNFT(uint256 typeId, address to, uint256 quantity) internal {
         uint256 tokenId = tokenIdCounter;
+        NftType memory nftType = nftTypeMap[typeId];
         (bool overflowsAdd, uint256 resultAdd) = Math.tryAdd(tokenId, quantity);
         require(
-            !overflowsAdd && resultAdd <= maxSupply,
+            !overflowsAdd && resultAdd <= nftType.maxSupply,
             "Purchase would exceed max supply of NFTs"
         );
 
         (bool overflowsMul, uint256 resultAmount) = Math.tryMul(
-            nftPrice,
+            nftType.price,
             quantity
         );
         require(
@@ -140,12 +151,19 @@ contract FanslandNFT is
             "Ether value sent is not correct"
         );
         for (uint i = 0; i < quantity; i++) {
-            _mint(to, tokenId + i);
+            uint256 curTokenId = tokenId + i;
+            _mint(to, curTokenId);
+
+            // set nft type
+            tokenIdTypeMap[curTokenId] = typeId;
+
+            // set nft type uri
+            _setTokenURI(curTokenId, nftType.uri);
+
+            // emit MintNft event
+            emit MintNft(address(0), to, curTokenId, typeId);
         }
         tokenIdCounter += quantity;
-
-        // TODO:
-        // _setTokenURI(1, "TODO");
     }
 
     /// @param account account
