@@ -25,17 +25,29 @@ contract FanslandNFT is
 
     // Contract private variables
     uint256 public tokenIdCounter;
-    bool public isSaleActive;
+    bool public openSale; // open sale
     uint256 public nftPrice;
     uint256 public maxSupply;
     string public baseURI;
+
+    struct nftType {
+        uint256 id; // ticket type id
+        string name; // type name
+        string uri; // uri
+        uint256 maxSupply; // maxsupply
+        uint256 price; // price
+        bool isSaleActive; // sale staus
+    }
+
+    mapping(uint256 => nftType) public typeMap;
+    mapping(uint256 => uint256) public tokenIdTypeMap;
 
     /**
      * @dev Emitted when the base URI is changed.
      */
     event UriChanged();
 
-    error SaleNotActive();
+    error OpenSaleNotActive();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -50,22 +62,55 @@ contract FanslandNFT is
         __Ownable_init(msg.sender);
         __ERC721Burnable_init();
 
-        isSaleActive = true;
+        openSale = true;
         baseURI = "ipfs://QmWiQE65tmpYzcokCheQmng2DCM33DEhjXcPB6PanwpAZo/";
         maxSupply = 100000;
         nftPrice = 0;
+
+        // TODO: init with some data
+        typeMap[0] = nftType({
+            id: 0,
+            name: "Fansland first NFT",
+            uri: "todo",
+            maxSupply: 10000,
+            price: 0,
+            isSaleActive: true
+        });
     }
 
-    modifier whenSaleActive() {
-        // require(isSaleActive, "Sale must be active to mint NFT");
-        if (!isSaleActive) {
-            revert SaleNotActive();
+    modifier whenOpenSale() {
+        if (!openSale) {
+            revert OpenSaleNotActive();
         }
         _;
     }
 
+    /// @dev update nft type
+    function updateNftType(
+        uint256 id,
+        string memory typeName,
+        string memory uri,
+        uint256 maxsupply,
+        uint256 price,
+        bool saleActive
+    ) public onlyOwner {
+        typeMap[id] = nftType({
+            id: id,
+            name: typeName,
+            uri: uri,
+            maxSupply: maxsupply,
+            price: price,
+            isSaleActive: saleActive
+        });
+    }
+
+    /// @dev delete nft type
+    function removeNftType(uint256 id) public onlyOwner {
+        delete typeMap[id];
+    }
+
     /// @dev This method should be invoked from web3 for minting a new NFT
-    function mint() public payable whenNotPaused whenSaleActive {
+    function mint() public payable whenNotPaused whenOpenSale {
         _mintNFT(msg.sender, 1);
     }
 
@@ -73,7 +118,7 @@ contract FanslandNFT is
     function mintBatch(
         address to,
         uint256 quantity
-    ) public payable whenNotPaused whenSaleActive {
+    ) public payable whenNotPaused whenOpenSale {
         _mintNFT(to, quantity);
     }
 
@@ -98,7 +143,6 @@ contract FanslandNFT is
             _mint(to, tokenId + i);
         }
         tokenIdCounter += quantity;
-
 
         // TODO:
         // _setTokenURI(1, "TODO");
@@ -166,10 +210,10 @@ contract FanslandNFT is
         payable(owner()).transfer(balance);
     }
 
-    /// @param isActive Sale status param.
+    /// @param isOpenSale Sale status param.
     /// @dev This method should be invoked from WEB3 for setting sale active status
-    function setSaleActive(bool isActive) public onlyOwner {
-        isSaleActive = isActive;
+    function setSaleActive(bool isOpenSale) public onlyOwner {
+        openSale = isOpenSale;
     }
 
     /// @param newBaseTokenURI New base token URI.

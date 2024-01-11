@@ -10,5 +10,11 @@ test:
 node:
 	npx hardhat node
 
+.PHONY: remixd
 remixd:
 	remixd -s ./ -u https://remix.ethereum.org
+
+.PHONY: remixd
+clean:
+	sudo rm -rf artifacts cache
+
