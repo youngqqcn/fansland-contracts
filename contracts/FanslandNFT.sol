@@ -176,6 +176,7 @@ contract FanslandNFT is
         }
 
         tokenIdTypeMap[typeId] += quantity;
+        nftTypeMap[typeId].totalSupply += quantity;
         tokenIdCounter += quantity;
     }
 
