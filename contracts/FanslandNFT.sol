@@ -1,34 +1,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 contract FanslandNFT is
     Initializable,
-    ERC721Upgradeable,
-    ERC721EnumerableUpgradeable,
-    ERC721URIStorageUpgradeable,
-    ERC721PausableUpgradeable,
+    ERC1155Upgradeable,
+    ERC1155URIStorageUpgradeable,
+    ERC1155PausableUpgradeable,
     OwnableUpgradeable,
-    ERC721BurnableUpgradeable,
+    ERC1155BurnableUpgradeable,
+    ERC1155SupplyUpgradeable,
     UUPSUpgradeable
 {
-    // using Math for uint256;
-
     // Contract private variables
+    string public name;
+    string public symbol;
     uint256 public tokenIdCounter;
     bool public isSaleActive;
     uint256 public nftPrice;
     uint256 public maxSupply;
     string public baseURI;
+    uint256[] public nftIds;
 
     /**
      * @dev Emitted when the base URI is changed.
@@ -42,19 +43,43 @@ contract FanslandNFT is
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function initialize() public initializer {
-        __ERC721_init("Fansland", "Fansland");
-        __ERC721Enumerable_init();
-        __ERC721URIStorage_init();
-        __Pausable_init();
+    function initialize(
+        string memory baseTokenURI,
+        uint256 maxTokenSupply,
+        uint256 tokenPrice
+    ) public initializer {
+        __ERC1155_init(
+           "https://token-cdn-domain/{id}.json"
+        );
+        __ERC1155URIStorage_init();
+        __ERC1155Pausable_init();
         __Ownable_init(msg.sender);
-        __ERC721Burnable_init();
+        __ERC1155Burnable_init();
 
         isSaleActive = true;
-        baseURI = "ipfs://QmWiQE65tmpYzcokCheQmng2DCM33DEhjXcPB6PanwpAZo/";
-        maxSupply = 100000;
-        nftPrice = 0;
+        baseTokenURI = baseTokenURI;
+        maxSupply = maxTokenSupply;
+        nftPrice = tokenPrice;
+        symbol = "Fansland";
+        name = "Fansland";
     }
+
+    // function initialize() public initializer {
+    //     __ERC1155_init(
+    //         "ipfs://QmWiQE65tmpYzcokCheQmng2DCM33DEhjXcPB6PanwpAZo/"
+    //     );
+    //     __ERC1155URIStorage_init();
+    //     __ERC1155Pausable_init();
+    //     __Ownable_init(msg.sender);
+    //     __ERC1155Burnable_init();
+
+    //     isSaleActive = true;
+    //     baseURI = "ipfs://QmWiQE65tmpYzcokCheQmng2DCM33DEhjXcPB6PanwpAZo/";
+    //     maxSupply = 100000;
+    //     nftPrice = 0;
+    // symbol = "Fansland";
+    // name = "Fansland";
+    // }
 
     modifier whenSaleActive() {
         // require(isSaleActive, "Sale must be active to mint NFT");
@@ -95,40 +120,29 @@ contract FanslandNFT is
             "Ether value sent is not correct"
         );
         for (uint i = 0; i < quantity; i++) {
-            _mint(to, tokenId + i);
+            _mint(to, tokenId + i, 1, ""); // TODO: fix
         }
         tokenIdCounter += quantity;
-
 
         // TODO:
         // _setTokenURI(1, "TODO");
     }
 
-    /// @param account account
-    /// @param value value
-    function _increaseBalance(
-        address account,
-        uint128 value
-    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
-        super._increaseBalance(account, value);
-    }
-
     function _update(
+        address from,
         address to,
-        uint256 tokenId,
-        address auth
+        uint256[] memory ids,
+        uint256[] memory values
     )
         internal
         override(
-            ERC721PausableUpgradeable,
-            ERC721Upgradeable,
-            ERC721EnumerableUpgradeable
+            ERC1155PausableUpgradeable,
+            ERC1155Upgradeable,
+            ERC1155SupplyUpgradeable
         )
-        whenNotPaused
-        returns (address)
     {
         // TODO: more check add here
-        return super._update(to, tokenId, auth);
+        return super._update(from, to, ids, values);
     }
 
     /// @notice Returns a list of all NFT IDs assigned to an address.
@@ -139,25 +153,17 @@ contract FanslandNFT is
     ///  not contract-to-contract calls.
     function tokensOfOwner(
         address _owner
-    ) public view returns (uint256[] memory ownerTokens) {
-        uint256 tokenCount = balanceOf(_owner);
-
-        if (tokenCount == 0) {
-            // Return an empty array
-            return new uint256[](0);
-        } else {
-            uint256[] memory result = new uint256[](tokenCount);
-            uint256 resultIndex = 0;
-
-            // We count on the fact that all cats have IDs starting at 1 and increasing
-            // sequentially up to the totalCat count.
-            uint256 index;
-            for (index = 0; index < tokenCount; index++) {
-                result[resultIndex] = tokenOfOwnerByIndex(_owner, index);
-                resultIndex++;
-            }
-            return result;
+    ) public view returns (uint256[] memory, uint256[] memory) {
+        uint256 len = nftIds.length;
+        uint256[] memory ids = new uint256[](len);
+        uint256[] memory balances = new uint256[](len);
+        for (uint i = 0; i < len; i++) {
+            uint256 id = nftIds[i];
+            ids[i] = id;
+            balances[i] = balanceOf(_owner, id);
         }
+
+        return (ids, balances);
     }
 
     /// @dev allows owner to withdraw ethers
@@ -189,34 +195,25 @@ contract FanslandNFT is
         _unpause();
     }
 
-    function tokenURI(
-        uint256 tokenId
+    function uri(
+        uint256 id
     )
         public
         view
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        override(ERC1155Upgradeable, ERC1155URIStorageUpgradeable)
         returns (string memory)
     {
-        return super.tokenURI(tokenId);
+        return string(abi.encodePacked(baseURI, id));
+    }
+
+    function tokenURI(uint256 id) external view returns (string memory) {
+        return uri(id);
     }
 
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        override(
-            ERC721EnumerableUpgradeable,
-            ERC721URIStorageUpgradeable,
-            ERC721Upgradeable
-        )
-        returns (bool)
-    {
+    ) public view override(ERC1155Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
-    }
-
-    function _baseURI() internal view virtual override returns (string memory) {
-        return baseURI;
     }
 
     /// @dev set token price

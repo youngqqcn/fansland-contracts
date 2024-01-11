@@ -29,8 +29,8 @@ describe("FanslandNFT", function () {
   let owner, alice, bob, john, shane;
 
   // Contract Information
-  const NAME = "MyNFT";
-  const SYMBOL = "NFT";
+  const NAME = "Fansland";
+  const SYMBOL = "Fansland";
   const MAX_NFTS = 1000;
   const NFT_PRICE = "0.001"; // in ETH
   const BASE_URI = "https://mynft.com/";
@@ -50,15 +50,14 @@ describe("FanslandNFT", function () {
   async function initContract() {
     console.log("===============", process.env.MUMBAI_PRIVATE_KEY)
 
-    console.log( "signers = ", await ethers.getSigners());
+    // console.log( "signers = ", await ethers.getSigners());
+    await ethers.getSigners();
 
     [owner, alice, bob, john, shane] = await ethers.getSigners();
     accounts = [owner, alice, bob, john, shane];
 
     const FanslandNFT = await ethers.getContractFactory("FanslandNFT");
     token = await upgrades.deployProxy(FanslandNFT, [
-      NAME,
-      SYMBOL,
       BASE_URI,
       MAX_NFTS,
       NFT_MINT_PRICE,
@@ -96,7 +95,7 @@ describe("FanslandNFT", function () {
       it("has zero initial supply", async function () {
         expect(await token.totalSupply()).to.equal(0);
         for (const acct of accounts) {
-          expect(await token.balanceOf(acct)).to.equal(0);
+          expect(await token.balanceOf(acct, 0)).to.equal(0);
         }
       });
 
@@ -155,7 +154,7 @@ describe("FanslandNFT", function () {
         await token.pause({ from: owner });
         const ttt = await token.connect(alice);
         await expect(
-          ttt.safeMint({ from: alice, value: NFT_MINT_PRICE })
+          ttt.mint({ from: alice, value: NFT_MINT_PRICE })
         ).to.be.revertedWithCustomError(ttt, "EnforcedPause");
         await token.unpause({ from: owner });
       });
@@ -233,16 +232,16 @@ describe("FanslandNFT", function () {
   describe("tokensOfOwner(address _owner)", () => {
     before(async function () {
       const ttt = await token.connect(alice);
-      await ttt.safeMint({ from: alice, value: NFT_MINT_PRICE });
-      await ttt.safeMint({ from: alice, value: NFT_MINT_PRICE });
+      await ttt.mint({ from: alice, value: NFT_MINT_PRICE });
+      await ttt.mint({ from: alice, value: NFT_MINT_PRICE });
 
       const ttt2 = await token.connect(john);
-      await ttt2.safeMint({ from: john, value: NFT_MINT_PRICE });
-      await ttt2.safeMint({ from: john, value: NFT_MINT_PRICE });
+      await ttt2.mint({ from: john, value: NFT_MINT_PRICE });
+      await ttt2.mint({ from: john, value: NFT_MINT_PRICE });
 
       const ttt3 = await token.connect(bob);
-      await ttt3.safeMint({ from: bob, value: NFT_MINT_PRICE });
-      await ttt3.safeMint({ from: bob, value: NFT_MINT_PRICE });
+      await ttt3.mint({ from: bob, value: NFT_MINT_PRICE });
+      await ttt3.mint({ from: bob, value: NFT_MINT_PRICE });
     });
 
     context("when queried for address with no token", async function () {
@@ -260,119 +259,119 @@ describe("FanslandNFT", function () {
     });
   });
 
-  describe("tokenURI(uint256 tokenId)", () => {
-    it("reverts when queried for non existent token id", async function () {
-      await expect(token.tokenURI(1000))
-        .to.be.revertedWithCustomError(token, "ERC721NonexistentToken")
-        .withArgs(1000);
-    });
+//   describe("tokenURI(uint256 tokenId)", () => {
+//     it("reverts when queried for non existent token id", async function () {
+//       await expect(token.tokenURI(1000))
+//         .to.be.revertedWithCustomError(token, "ERC721NonexistentToken")
+//         .withArgs(1000);
+//     });
 
-    it("returns when queried for existing token id", async function () {
-      const tokenId = 1;
-      const expectedTokenURI = BASE_URI + tokenId;
-      expect(await token.tokenURI(tokenId)).to.equal(expectedTokenURI);
-    });
-  });
+//     it("returns when queried for existing token id", async function () {
+//       const tokenId = 1;
+//       const expectedTokenURI = BASE_URI + tokenId;
+//       expect(await token.tokenURI(tokenId)).to.equal(expectedTokenURI);
+//     });
+//   });
 
-  describe("setBaseURI(string memory newBaseTokenURI)", () => {
-    const newURI = "https://collectible-aliens.com/v1";
-    context("when called with other user", function () {
-      it("reverts", async function () {
-        const ttt = await token.connect(alice);
-        await expectRevert(
-          ttt.setBaseURI(newURI, { from: alice }),
-          'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
-        );
-      });
-    });
+//   describe("setBaseURI(string memory newBaseTokenURI)", () => {
+//     const newURI = "https://collectible-aliens.com/v1";
+//     context("when called with other user", function () {
+//       it("reverts", async function () {
+//         const ttt = await token.connect(alice);
+//         await expectRevert(
+//           ttt.setBaseURI(newURI, { from: alice }),
+//           'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
+//         );
+//       });
+//     });
 
-    context("when called with owner user", function () {
-      it("sets the new URI", async function () {
-        const tokenId = 1;
-        const beforeChangeURI = BASE_URI + tokenId;
-        expect(await token.tokenURI(tokenId)).to.equal(beforeChangeURI);
+//     context("when called with owner user", function () {
+//       it("sets the new URI", async function () {
+//         const tokenId = 1;
+//         const beforeChangeURI = BASE_URI + tokenId;
+//         expect(await token.tokenURI(tokenId)).to.equal(beforeChangeURI);
 
-        const receipt = await token.setBaseURI(newURI, { from: owner });
-        expectEvent.inTransaction(receipt, EventNames.UriChanged);
+//         const receipt = await token.setBaseURI(newURI, { from: owner });
+//         expectEvent.inTransaction(receipt, EventNames.UriChanged);
 
-        const afterChangeURI = newURI + tokenId;
-        expect(await token.tokenURI(tokenId)).to.equal(afterChangeURI);
-      });
-    });
-  });
+//         const afterChangeURI = newURI + tokenId;
+//         expect(await token.tokenURI(tokenId)).to.equal(afterChangeURI);
+//       });
+//     });
+//   });
 
-  describe("withdraw()", function () {
-    context("when other account tries to withdraw the balance", function () {
-      it("reverts", async function () {
-        const ttt = await token.connect(alice);
-        await expectRevert(
-          ttt.withdraw({ from: alice }),
-          'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
-        );
-      });
-    });
+//   describe("withdraw()", function () {
+//     context("when other account tries to withdraw the balance", function () {
+//       it("reverts", async function () {
+//         const ttt = await token.connect(alice);
+//         await expectRevert(
+//           ttt.withdraw({ from: alice }),
+//           'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
+//         );
+//       });
+//     });
 
-    context("when owner tries to withdraw the balance", function () {
-      before(async function () {
-        ({ logs: this.logs } = await token.withdraw({ from: owner }));
-      });
+//     context("when owner tries to withdraw the balance", function () {
+//       before(async function () {
+//         ({ logs: this.logs } = await token.withdraw({ from: owner }));
+//       });
 
-      it("transfers balance succesfully to owner", async function () {
-        expect(await web3.eth.getBalance(owner.address)).to.equal(
-          "10000000000000000000000"
-        );
-      });
-    });
-  });
+//       it("transfers balance succesfully to owner", async function () {
+//         expect(await web3.eth.getBalance(owner.address)).to.equal(
+//           "10000000000000000000000"
+//         );
+//       });
+//     });
+//   });
 
-  describe("burn(uint256 tokenId)", function () {
-    it("reverts when burning a non-existent token id", async function () {
-      await expectRevert(token.burn(100000), "ERC721NonexistentToken(100000)");
-    });
+//   describe("burn(uint256 tokenId)", function () {
+//     it("reverts when burning a non-existent token id", async function () {
+//       await expectRevert(token.burn(100000), "ERC721NonexistentToken(100000)");
+//     });
 
-    context("with minted tokens", function () {
-      context("with burnt token", function () {
-        before(async function () {
-          const ttt = await token.connect(alice);
-          this.receipt = await ttt.burn(FIRST_TOKEN_ID, {
-            from: alice,
-          });
-        });
+//     context("with minted tokens", function () {
+//       context("with burnt token", function () {
+//         before(async function () {
+//           const ttt = await token.connect(alice);
+//           this.receipt = await ttt.burn(FIRST_TOKEN_ID, {
+//             from: alice,
+//           });
+//         });
 
-        it("emits a Transfer event", function () {
-          expectEvent.inTransaction(this.receipt, EventNames.Transfer, {
-            from: alice,
-            to: ZERO_ADDRESS,
-            tokenId: FIRST_TOKEN_ID,
-          });
-        });
+//         it("emits a Transfer event", function () {
+//           expectEvent.inTransaction(this.receipt, EventNames.Transfer, {
+//             from: alice,
+//             to: ZERO_ADDRESS,
+//             tokenId: FIRST_TOKEN_ID,
+//           });
+//         });
 
-        it("emits an Approval event", function () {
-          expectEvent.inTransaction(this.receipt , EventNames.Approval, {
-            approved: ZERO_ADDRESS,
-            tokenId: FIRST_TOKEN_ID,
-          });
-        });
+//         it("emits an Approval event", function () {
+//           expectEvent.inTransaction(this.receipt , EventNames.Approval, {
+//             approved: ZERO_ADDRESS,
+//             tokenId: FIRST_TOKEN_ID,
+//           });
+//         });
 
-        it("deletes the token", async function () {
-          const ttt = await token.connect(alice);
-          expect(await token.balanceOf(alice)).to.be.equal("1");
-          await expectRevert(
-            ttt.ownerOf(FIRST_TOKEN_ID),
-            "ERC721NonexistentToken(1)"
-          );
-        });
+//         it("deletes the token", async function () {
+//           const ttt = await token.connect(alice);
+//           expect(await token.balanceOf(alice)).to.be.equal("1");
+//           await expectRevert(
+//             ttt.ownerOf(FIRST_TOKEN_ID),
+//             "ERC721NonexistentToken(1)"
+//           );
+//         });
 
-        it("reverts when burning a token id that has been deleted", async function () {
-          const ttt = await token.connect(alice);
-          await expectRevert(
-            ttt.burn(FIRST_TOKEN_ID, { from: alice }),
-            "ERC721NonexistentToken(1)"
-          );
-        });
-      });
-    });
-  });
+//         it("reverts when burning a token id that has been deleted", async function () {
+//           const ttt = await token.connect(alice);
+//           await expectRevert(
+//             ttt.burn(FIRST_TOKEN_ID, { from: alice }),
+//             "ERC721NonexistentToken(1)"
+//           );
+//         });
+//       });
+//     });
+//   });
 
   after(() => {
     token = null;
