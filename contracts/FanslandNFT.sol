@@ -58,7 +58,6 @@ contract FanslandNFT is
         uint256 typeId
     );
 
-    error OpenSaleNotActive();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -74,7 +73,7 @@ contract FanslandNFT is
         __ERC721Burnable_init();
 
         openSale = true;
-        baseURI = "ipfs://QmWiQE65tmpYzcokCheQmng2DCM33DEhjXcPB6PanwpAZo/";
+        baseURI = "https://mynft.com/";
         maxSupply = 100000;
         // nftPrice = 0;
 
@@ -82,7 +81,7 @@ contract FanslandNFT is
         nftTypeMap[0] = NftType({
             id: 0,
             name: "Fansland first NFT",
-            uri: "todo",
+            uri: "uri/0",
             maxSupply: 10000,
             totalSupply: 0,
             price: 0.001 ether,
@@ -91,9 +90,11 @@ contract FanslandNFT is
     }
 
     modifier whenOpenSale() {
-        if (!openSale) {
-            revert OpenSaleNotActive();
-        }
+        // if (!openSale) {
+            // revert OpenSaleNotActive();
+        // }
+        require(openSale, "Sale must be active to mint NFT");
+
         _;
     }
 
@@ -140,18 +141,18 @@ contract FanslandNFT is
     function _mintNFT(uint256 typeId, address to, uint256 quantity) internal {
         uint256 tokenId = tokenIdCounter;
         NftType memory nftType = nftTypeMap[typeId];
-        (bool overflowsAdd, uint256 resultAdd) = Math.tryAdd(tokenId, quantity);
+        (bool okAdd, uint256 resultAdd) = Math.tryAdd(tokenId, quantity);
         require(
-            !overflowsAdd && resultAdd <= nftType.maxSupply,
+            okAdd && resultAdd <= nftType.maxSupply,
             "Purchase would exceed max supply of NFTs"
         );
 
-        (bool overflowsMul, uint256 resultAmount) = Math.tryMul(
+        (bool okMul, uint256 resultAmount) = Math.tryMul(
             nftType.price,
             quantity
         );
         require(
-            !overflowsMul && resultAmount <= msg.value,
+            okMul && resultAmount <= msg.value,
             "Ether value sent is not correct"
         );
         for (uint i = 0; i < quantity; i++) {
@@ -161,7 +162,7 @@ contract FanslandNFT is
             // set nft type
             tokenIdTypeMap[curTokenId] = typeId;
 
-            // set nft type uri
+            // set nft type uri as tokenURI for this tokenId
             _setTokenURI(curTokenId, nftType.uri);
 
             // emit MintNft event

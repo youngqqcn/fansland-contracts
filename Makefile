@@ -16,5 +16,6 @@ remixd:
 
 .PHONY: remixd
 clean:
+	npx hardhat clean
 	sudo rm -rf artifacts cache
 

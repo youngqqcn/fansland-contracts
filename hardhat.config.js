@@ -7,6 +7,7 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
+        timeout: 600000,
     },
     mumbai: {
         url: "https://rpc-mumbai.maticvigil.com",
