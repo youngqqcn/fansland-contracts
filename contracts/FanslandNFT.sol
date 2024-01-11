@@ -46,6 +46,8 @@ contract FanslandNFT is
     mapping(uint256 => bool) public typeExists;
     mapping(uint256 => uint256) public tokenIdTypeMap;
 
+    address public usdt;
+
     /**
      * @dev Emitted when the base URI is changed.
      */
@@ -135,6 +137,37 @@ contract FanslandNFT is
         uint256[] calldata quantities
     ) public payable whenNotPaused whenOpenSale {
         require(typeIds.length == quantities.length, "args length not match");
+
+        // aggregate all price and quantity
+        uint256 totalPrice = 0;
+        // uint256 totalQuantity = 0;
+        for (uint i = 0; i < typeIds.length; i++) {
+            uint256 typeId = typeIds[i];
+            require(typeExists[typeId], "invalid typeId");
+
+            (bool okAdd1, uint256 resultAdd1) = Math.tryAdd(
+                nftTypeMap[typeId].totalSupply,
+                quantities[i]
+            );
+            require(okAdd1, "quantity overflow");
+            require(nftTypeMap[typeId].maxSupply >resultAdd1, "Purchase would exceed max supply of NFTs" );
+
+            (bool okMul, uint256 resultMul) = Math.tryMul(
+                nftTypeMap[typeId].price,
+                quantities[i]
+            );
+            require(okMul, "mul overflow");
+
+            (bool okAdd, uint256 resultAdd) = Math.tryAdd(
+                resultMul,
+                totalPrice
+            );
+            require(okAdd, "add overflow");
+
+            totalPrice = resultAdd;
+        }
+        require(totalPrice <= msg.value, "Ether value sent is not correct");
+
         for (uint i = 0; i < typeIds.length; i++) {
             _mintNFT(typeIds[i], _msgSender(), quantities[i]);
         }
@@ -146,21 +179,6 @@ contract FanslandNFT is
 
         uint256 tokenId = tokenIdCounter;
         NftType memory nftType = nftTypeMap[typeId];
-
-        (bool okAdd, uint256 resultAdd) = Math.tryAdd(tokenId, quantity);
-        require(
-            okAdd && resultAdd <= nftType.maxSupply,
-            "Purchase would exceed max supply of NFTs"
-        );
-
-        (bool okMul, uint256 resultAmount) = Math.tryMul(
-            nftType.price,
-            quantity
-        );
-        require(
-            okMul && resultAmount <= msg.value,
-            "Ether value sent is not correct"
-        );
         for (uint i = 0; i < quantity; i++) {
             uint256 curTokenId = tokenId + i;
             _mint(to, curTokenId);
