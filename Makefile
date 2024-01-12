@@ -19,3 +19,8 @@ clean:
 	npx hardhat clean
 	sudo rm -rf artifacts cache
 
+
+
+.PHONY: deploy
+deploy:
+	npx hardhat run --network mumbai scripts/deploy.js

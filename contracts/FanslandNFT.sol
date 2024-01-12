@@ -91,7 +91,7 @@ contract FanslandNFT is
 
         // usdt
         paymentTokensMap[
-            address(0x2F7b97837F2D14bA2eD3a4B2282e259126A9b848)
+            address(0x51716F5783Ac7D2E6943232f8691DBA16EdeE186)
         ] = true;
     }
 
@@ -190,10 +190,15 @@ contract FanslandNFT is
         );
         require(okDiv, "div overflow");
 
-        require(
-            erc20Token.transferFrom(msg.sender, address(this), tokenAmount),
-            "transfer failed"
-        );
+        // require(
+        //     erc20Token.transferFrom(msg.sender, address(this), tokenAmount),
+        //     "transfer failed"
+        // );
+        
+        // some usdt doesn't return
+        erc20Token.transferFrom(msg.sender, address(this), tokenAmount);
+        // TODO: check balance
+        
         for (uint i = 0; i < typeIds.length; i++) {
             _mintNFT(typeIds[i], _msgSender(), quantities[i]);
         }

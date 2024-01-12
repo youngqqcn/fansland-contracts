@@ -66,15 +66,16 @@ describe("FanslandNFT", function () {
     // depoly test USDT erc20 contract
     const usdt = await ethers.getContractFactory("USDT");
     UsdtToken = await usdt.deploy();
+    await UsdtToken.waitForDeployment();
     // await UsdtToken.deployed();
 
     const FanslandNFT = await ethers.getContractFactory("FanslandNFT");
     token = await upgrades.deployProxy(FanslandNFT, []);
-    // await token.deployed();
-    // console.debug(token);
+    await token.waitForDeployment();
 
     // set test USDT erc20 contract
     await token.updatePaymentToken(UsdtToken, true);
+
 
     // 升级
     // token = await upgradeProxy(tokenV1.address, NFT);
