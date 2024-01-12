@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
@@ -28,7 +29,6 @@ contract FanslandNFT is
     // Contract private variables
     uint256 public tokenIdCounter;
     bool public openSale; // open sale
-    uint256 public nftPrice;
     uint256 public maxSupply;
     string public baseURI;
 
@@ -45,8 +45,7 @@ contract FanslandNFT is
     mapping(uint256 => NftType) public nftTypeMap;
     mapping(uint256 => bool) public typeExists;
     mapping(uint256 => uint256) public tokenIdTypeMap;
-
-    address public usdt;
+    mapping(address => bool) public paymentTokensMap;
 
     /**
      * @dev Emitted when the base URI is changed.
@@ -90,6 +89,11 @@ contract FanslandNFT is
             isSaleActive: true
         });
         typeExists[0] = true;
+
+        // usdt
+        paymentTokensMap[
+            address(0x2F7b97837F2D14bA2eD3a4B2282e259126A9b848)
+        ] = true;
     }
 
     modifier whenOpenSale() {
@@ -99,6 +103,14 @@ contract FanslandNFT is
         require(openSale, "Sale must be active to mint NFT");
 
         _;
+    }
+
+    /// @dev set erc20 contract
+    function updatePaymentToken(
+        address erc20Contract,
+        bool active
+    ) public onlyOwner {
+        paymentTokensMap[erc20Contract] = active;
     }
 
     /// @dev update nft type
@@ -129,16 +141,12 @@ contract FanslandNFT is
         typeExists[id] = false;
     }
 
-    /// @dev batch mint
-    /// @param typeIds  nft types
-    /// @param quantities quantitys
-    function mintBatch(
+    // aggregate all price and quantity
+    function calcTotalPrice(
         uint256[] calldata typeIds,
         uint256[] calldata quantities
-    ) public payable whenNotPaused whenOpenSale {
+    ) internal view returns (uint256) {
         require(typeIds.length == quantities.length, "args length not match");
-
-        // aggregate all price and quantity
         uint256 totalPrice = 0;
         // uint256 totalQuantity = 0;
         for (uint i = 0; i < typeIds.length; i++) {
@@ -150,7 +158,10 @@ contract FanslandNFT is
                 quantities[i]
             );
             require(okAdd1, "quantity overflow");
-            require(nftTypeMap[typeId].maxSupply >resultAdd1, "Purchase would exceed max supply of NFTs" );
+            require(
+                nftTypeMap[typeId].maxSupply > resultAdd1,
+                "Purchase would exceed max supply of NFTs"
+            );
 
             (bool okMul, uint256 resultMul) = Math.tryMul(
                 nftTypeMap[typeId].price,
@@ -166,6 +177,43 @@ contract FanslandNFT is
 
             totalPrice = resultAdd;
         }
+        return totalPrice;
+    }
+
+    function mintBatchByErc20(
+        address payToken,
+        uint256[] calldata typeIds,
+        uint256[] calldata quantities
+    ) public whenNotPaused whenOpenSale {
+        require(typeIds.length == quantities.length, "args length not match");
+        require(paymentTokensMap[payToken], "payment token not support");
+
+        IERC20Metadata erc20Token = IERC20Metadata(payToken);
+        uint256 totalPriceInWei = calcTotalPrice(typeIds, quantities);
+        (bool okDiv, uint256 tokenAmount) = Math.tryDiv(
+            totalPriceInWei,
+            10 ** (18 - erc20Token.decimals())
+        );
+        require(okDiv, "div overflow");
+
+        require(
+            erc20Token.transferFrom(msg.sender, address(this), tokenAmount),
+            "transfer failed"
+        );
+        for (uint i = 0; i < typeIds.length; i++) {
+            _mintNFT(typeIds[i], _msgSender(), quantities[i]);
+        }
+    }
+
+    /// @dev batch mint
+    /// @param typeIds  nft types
+    /// @param quantities quantitys
+    function mintBatch(
+        uint256[] calldata typeIds,
+        uint256[] calldata quantities
+    ) public payable whenNotPaused whenOpenSale {
+        require(typeIds.length == quantities.length, "args length not match");
+        uint256 totalPrice = calcTotalPrice(typeIds, quantities);
         require(totalPrice <= msg.value, "Ether value sent is not correct");
 
         for (uint i = 0; i < typeIds.length; i++) {
@@ -316,10 +364,5 @@ contract FanslandNFT is
 
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
-    }
-
-    /// @dev set token price
-    function setNftPrice(uint256 price) public onlyOwner {
-        nftPrice = price;
     }
 }

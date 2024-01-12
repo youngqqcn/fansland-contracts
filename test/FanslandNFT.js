@@ -67,10 +67,22 @@ describe("FanslandNFT", function () {
     [owner, alice, bob, john, shane] = await ethers.getSigners();
     accounts = [owner, alice, bob, john, shane];
 
+
+    // depoly test USDT erc20 contract
+    const usdt = await ethers.getContractFactory("USDT");
+    // ethers.deployContract()
+    const UsdtToken = await usdt.deploy();
+
+
+
     const FanslandNFT = await ethers.getContractFactory("FanslandNFT");
     token = await upgrades.deployProxy(FanslandNFT, []);
     await token.waitForDeployment();
     // console.debug(token);
+
+
+    // set test USDT erc20 contract
+    await token.updatePaymentToken(UsdtToken, true);
 
     // 升级
     // token = await upgradeProxy(tokenV1.address, NFT);
