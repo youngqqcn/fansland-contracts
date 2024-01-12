@@ -22,6 +22,15 @@ clean:
 
 
 
-.PHONY: deploy
-deploy:
-	npx hardhat run --network mumbai scripts/deploy.js
+.PHONY: deploy-usdt
+deploy-usdt:
+	npx hardhat run --network mumbai scripts/deployUsdt.js
+
+
+.PHONY: deploy-nft
+deploy-nft:
+	npx hardhat run --network mumbai scripts/deployFanslandNFT.js
+
+.PHONY: verify
+verify:
+	npx hardhat verify --network mumbai 0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e
