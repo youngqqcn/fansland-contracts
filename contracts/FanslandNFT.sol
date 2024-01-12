@@ -141,10 +141,10 @@ contract FanslandNFT is
     }
 
     // aggregate all price and quantity
-    function calcTotalPrice(
+    function calculateTotal(
         uint256[] calldata typeIds,
         uint256[] calldata quantities
-    ) internal view returns (uint256) {
+    ) public view returns (uint256) {
         require(typeIds.length == quantities.length, "args length not match");
         uint256 totalPrice = 0;
         for (uint i = 0; i < typeIds.length; i++) {
@@ -183,27 +183,27 @@ contract FanslandNFT is
         require(paymentTokensMap[payToken], "payment token not support");
 
         IERC20Metadata erc20Token = IERC20Metadata(payToken);
-        uint256 totalPriceInWei = calcTotalPrice(typeIds, quantities);
+        uint256 totalPriceInWei = calculateTotal(typeIds, quantities);
         (bool okDiv, uint256 tokenAmount) = Math.tryDiv(
             totalPriceInWei,
             10 ** (18 - erc20Token.decimals())
         );
         require(okDiv, "div overflow");
 
-        // require(
-        //     erc20Token.transferFrom(msg.sender, address(this), tokenAmount),
-        //     "transfer failed"
-        // );
-        
+        require(
+            erc20Token.transferFrom(msg.sender, address(this), tokenAmount),
+            "transfer failed"
+        );
+
         // some usdt doesn't return
-        erc20Token.transferFrom(msg.sender, address(this), tokenAmount);
-        // TODO: check balance
-        
+        // erc20Token.transferFrom(msg.sender, address(this), tokenAmount);
+
         for (uint i = 0; i < typeIds.length; i++) {
             _mintNFT(typeIds[i], _msgSender(), quantities[i]);
         }
     }
 
+    // TODO: remove this function
     /// @dev batch mint
     /// @param typeIds  nft types
     /// @param quantities quantitys
@@ -212,7 +212,7 @@ contract FanslandNFT is
         uint256[] calldata quantities
     ) public payable whenNotPaused whenOpenSale {
         require(typeIds.length == quantities.length, "args length not match");
-        uint256 totalPrice = calcTotalPrice(typeIds, quantities);
+        uint256 totalPrice = calculateTotal(typeIds, quantities);
         require(totalPrice <= msg.value, "Ether value sent is not correct");
 
         for (uint i = 0; i < typeIds.length; i++) {
