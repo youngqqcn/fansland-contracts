@@ -291,13 +291,16 @@ describe("FanslandNFT", function () {
           .withArgs(owner, token, 0.001 * 1000000);
 
         // console.log("rrrrr11111111==", r1);
-        await expect(
-          await token.mintBatchByErc20(UsdtToken, [0], [1], {
-            from: owner,
-          })
-        )
+        const receipt = await token.mintBatchByErc20(UsdtToken, [0], [1], {
+          from: owner,
+        });
+        await expect(receipt)
           .to.emit(token, EventNames.MintNft)
           .withArgs(ZERO_ADDRESS, owner, 1, 0);
+
+        await expect(receipt)
+          .to.emit(token, EventNames.Transfer)
+          .withArgs(ZERO_ADDRESS, owner, 1);
       });
     });
   });
