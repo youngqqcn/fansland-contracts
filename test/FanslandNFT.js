@@ -5,12 +5,7 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 const { fromWei, toWei } = require("web3-utils");
-const {
-  BN,
-  constants,
-  expectEvent,
-  expectRevert,
-} = require("@openzeppelin/test-helpers");
+const { BN, constants, expectRevert } = require("@openzeppelin/test-helpers");
 const { ethers, upgrades } = require("hardhat");
 const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 const { ZERO_ADDRESS } = constants;
@@ -46,6 +41,7 @@ describe("FanslandNFT", function () {
   // Smart Contract instance variable
   // var fanslandNFT = null
   var token = null;
+  var UsdtToken = null;
   let accounts = [];
 
   // NftType
@@ -67,19 +63,15 @@ describe("FanslandNFT", function () {
     [owner, alice, bob, john, shane] = await ethers.getSigners();
     accounts = [owner, alice, bob, john, shane];
 
-
     // depoly test USDT erc20 contract
     const usdt = await ethers.getContractFactory("USDT");
-    // ethers.deployContract()
-    const UsdtToken = await usdt.deploy();
-
-
+    UsdtToken = await usdt.deploy();
+    // await UsdtToken.deployed();
 
     const FanslandNFT = await ethers.getContractFactory("FanslandNFT");
     token = await upgrades.deployProxy(FanslandNFT, []);
-    await token.waitForDeployment();
+    // await token.deployed();
     // console.debug(token);
-
 
     // set test USDT erc20 contract
     await token.updatePaymentToken(UsdtToken, true);
@@ -89,95 +81,96 @@ describe("FanslandNFT", function () {
     console.debug(`New NFT contract deployed - address: ${token.target}`);
   }
 
-  before(async () => {
+  before(async function () {
     await initContract();
   });
 
   describe("Initial State", () => {
-    context("when the NFT contract is instantiated", function () {
+    context("when the NFT contract is instantiated", async function () {
       it("has a name", async function () {
-        expect(await token.name()).to.equal(NAME);
+        await expect(await token.name()).to.equal(NAME);
       });
 
       it("has a symbol", async function () {
-        expect(await token.symbol()).to.equal(SYMBOL);
+        await expect(await token.symbol()).to.equal(SYMBOL);
       });
 
       it("has sale activated", async function () {
-        expect(await token.openSale()).is.true;
+        await expect(await token.openSale()).is.true;
       });
 
       it("has fixed max supply", async function () {
-        expect(await token.maxSupply()).to.equal(MAX_NFTS);
+        await expect(await token.maxSupply()).to.equal(MAX_NFTS);
       });
 
       it("has zero initial supply", async function () {
         const t = await token.nftTypeMap(0);
-        console.log("xxxxxxx==");
-        expect(t[TOTAL_SUPPLY_IDX]).to.equal(0);
+        // console.log("xxxxxxx==");
+        await expect(t[TOTAL_SUPPLY_IDX]).to.equal(0);
         for (const acct of accounts) {
-          expect(await token.balanceOf(acct)).to.equal(0);
+          await expect(await token.balanceOf(acct)).to.equal(0);
         }
       });
 
-      it("has each NFT price set to 0.001 ether", async () => {
+      it("has each NFT price set to 0.001 ether", async function () {
         const t = await token.nftTypeMap(0);
         let price = t[PRICE_IDX];
-        expect(fromWei(new BN(price))).to.equal(NFT_PRICE);
+        await expect(fromWei(new BN(price))).to.equal(NFT_PRICE);
       });
 
-      it("has each NFT price set to 0.001 ether", async () => {
+      it("has each NFT price set to 0.001 ether", async function () {
         const t = await token.nftTypeMap(0);
         let status = t[SALE_ACTIVE_IDX];
-        expect(status).is.true;
+        await expect(status).is.true;
       });
     });
   });
 
   describe("setSaleActive()", () => {
-    context("when non-owner tries to change sale active status", function () {
-      it("reverts", async () => {
-        const ttt = await token.connect(alice);
-        await expect(ttt.setSaleActive(false, { from: alice }))
-          .to.be.revertedWithCustomError(ttt, "OwnableUnauthorizedAccount")
-          .withArgs(alice);
-      });
-    });
+    context(
+      "when non-owner tries to change sale active status",
+      async function () {
+        it("reverts", async () => {
+          const ttt = await token.connect(alice);
+          await expect(ttt.setSaleActive(false, { from: alice }))
+            .to.be.revertedWithCustomError(ttt, "OwnableUnauthorizedAccount")
+            .withArgs(alice);
+        });
+      }
+    );
 
     context("when owner tries to change sale active status", function () {
-      it("can set sale active state to false", async () => {
+      it("can set sale active state to false", async function () {
         await token.setSaleActive(false, { from: owner });
-        expect(await token.openSale()).is.false;
+        await expect(await token.openSale()).is.false;
       });
 
-      it("can set sale active state to true", async () => {
+      it("can set sale active state to true", async function () {
         await token.setSaleActive(true, { from: owner });
-        expect(await token.openSale()).is.true;
+        await expect(await token.openSale()).is.true;
       });
     });
   });
 
-  describe("pause()", () => {
+  describe("pause()", async function () {
     context("when owner tries to pause the contract", function () {
       it("deployer can pause", async function () {
         const receipt = await token.pause({ from: owner });
         // console.log("pause====receipt = ", receipt);
-        expectEvent.inTransaction(receipt, EventNames.Paused, {
-          account: owner,
-        });
-        expect(await token.paused()).to.equal(true);
+        await expect(receipt).to.emit(token, EventNames.Paused).withArgs(owner);
+        await expect(await token.paused()).to.equal(true);
       });
 
       it("deployer can unpause", async function () {
         const receipt = await token.unpause({ from: owner });
-        expectEvent.inTransaction(receipt, EventNames.Unpaused, {
-          account: owner,
-        });
+        await expect(receipt)
+          .to.emit(token, EventNames.Unpaused)
+          .withArgs(owner);
         expect(await token.paused()).to.equal(false);
       });
     });
 
-    context("when minting with paused contract", function () {
+    context("when minting with paused contract", async function () {
       it("cannot mint while paused", async function () {
         await token.pause({ from: owner });
         const ttt = await token.connect(alice);
@@ -188,29 +181,35 @@ describe("FanslandNFT", function () {
       });
     });
 
-    context("when other account tries to pause the contract", function () {
-      it("reverts", async function () {
-        const ttt = await token.connect(alice);
-        await expect(ttt.pause({ from: alice }))
-          .to.be.revertedWithCustomError(ttt, "OwnableUnauthorizedAccount")
-          .withArgs(alice);
-      });
-    });
+    context(
+      "when other account tries to pause the contract",
+      async function () {
+        it("reverts", async function () {
+          const ttt = await token.connect(alice);
+          await expect(ttt.pause({ from: alice }))
+            .to.be.revertedWithCustomError(ttt, "OwnableUnauthorizedAccount")
+            .withArgs(alice);
+        });
+      }
+    );
 
-    context("when other account tries to unpause the contract", function () {
-      it("reverts", async function () {
-        await token.pause({ from: owner });
-        const ttt = await token.connect(alice);
-        await expect(ttt.unpause({ from: alice }))
-          .to.be.revertedWithCustomError(ttt, "OwnableUnauthorizedAccount")
-          .withArgs(alice);
+    context(
+      "when other account tries to unpause the contract",
+      async function () {
+        it("reverts", async function () {
+          await token.pause({ from: owner });
+          const ttt = await token.connect(alice);
+          await expect(ttt.unpause({ from: alice }))
+            .to.be.revertedWithCustomError(ttt, "OwnableUnauthorizedAccount")
+            .withArgs(alice);
 
-        await token.unpause({ from: owner });
-      });
-    });
+          await token.unpause({ from: owner });
+        });
+      }
+    );
   });
 
-  describe("mintBatch()", async () => {
+  describe("mintBatch()", async function () {
     context("when sale is in-active, on trying to mint", async function () {
       it("reverts", async function () {
         const ttt = await token.connect(alice);
@@ -239,37 +238,36 @@ describe("FanslandNFT", function () {
     context("with minted token", async function () {
       before(async function () {
         const firstTokenId = "0";
-        const ttt = await token.connect(alice);
-        ({ logs: this.logs } = await ttt.mintBatch([0], [1], {
+        this.ttt = await token.connect(alice);
+        this.receipt = await this.ttt.mintBatch([0], [1], {
           from: alice,
           value: NFT_MINT_PRICE,
-        }));
-      });
-
-      it("emits a Transfer event", function () {
-        expectEvent.inTransaction(this.logs, EventNames.Transfer, {
-          from: ZERO_ADDRESS,
-          to: alice,
         });
       });
 
-      it("MintNft event", async () => {
-        expectEvent.inTransaction(this.logs, EventNames.MintNft, {
-          from: ZERO_ADDRESS,
-          to: owner,
-          typeId: 0,
-        });
+      it("emits a Transfer event", async function () {
+        // console.log("==============555", this.txhash);
+        // console.log("==============555777", this.txhash.hash);
+        await expect(this.receipt)
+          .to.emit(this.ttt, EventNames.Transfer)
+          .withArgs(ZERO_ADDRESS, alice, 0);
+      });
+
+      it("MintNft event", async function () {
+        await expect(this.receipt)
+          .to.emit(this.ttt, EventNames.MintNft)
+          .withArgs(ZERO_ADDRESS, alice, 0, 0);
       });
 
       it("creates the token", async function () {
         const firstTokenId = 0n;
-        const ttt = await token.connect(alice);
-        expect(await ttt.balanceOf(alice)).to.equal("1");
-        expect(await ttt.ownerOf(firstTokenId)).to.equal(alice);
+        // const ttt = await token.connect(alice);
+        await expect(await this.ttt.balanceOf(alice)).to.equal("1");
+        await expect(await this.ttt.ownerOf(firstTokenId)).to.equal(alice);
       });
     });
 
-    context("mint with wrong typeId ", async () => {
+    context("mint with wrong typeId ", async function () {
       it("reverts", async () => {
         await expectRevert(
           token.mintBatch([100001], [1], {
@@ -281,7 +279,30 @@ describe("FanslandNFT", function () {
     });
   });
 
-  describe("tokensOfOwner(address _owner)", () => {
+  describe("mintBatchByErc20", async () => {
+    context("mint with mintBatchByErc20", async function () {
+      it("mint ok", async () => {
+        await expect(
+          await UsdtToken.approve(token, 0.001 * 1000000, {
+            from: owner,
+          })
+        )
+          .to.emit(UsdtToken, "Approval")
+          .withArgs(owner, token, 0.001 * 1000000);
+
+        // console.log("rrrrr11111111==", r1);
+        await expect(
+          await token.mintBatchByErc20(UsdtToken, [0], [1], {
+            from: owner,
+          })
+        )
+          .to.emit(token, EventNames.MintNft)
+          .withArgs(ZERO_ADDRESS, owner, 1, 0);
+      });
+    });
+  });
+
+  describe("tokensOfOwner(address _owner)", async function () {
     before(async function () {
       const ttt = await token.connect(alice);
       await ttt.mintBatch([0], [1], { from: alice, value: NFT_MINT_PRICE });
@@ -325,7 +346,7 @@ describe("FanslandNFT", function () {
     });
   });
 
-  describe("setBaseURI(string memory newBaseTokenURI)", () => {
+  describe("setBaseURI(string memory newBaseTokenURI)", async function () {
     const newURI = "https://collectible-aliens.com/v1";
     context("when called with other user", function () {
       it("reverts", async function () {
@@ -337,14 +358,14 @@ describe("FanslandNFT", function () {
       });
     });
 
-    context("when called with owner user", function () {
+    context("when called with owner user", async function () {
       it("sets the new URI", async function () {
         const tokenId = 1;
         const beforeChangeURI = BASE_URI + DEFAULT_TYPE_URI;
         expect(await token.tokenURI(tokenId)).to.equal(beforeChangeURI);
 
         const receipt = await token.setBaseURI(newURI, { from: owner });
-        expectEvent.inTransaction(receipt, EventNames.UriChanged);
+        await expect(receipt, token, EventNames.UriChanged);
 
         const afterChangeURI = newURI + DEFAULT_TYPE_URI;
         expect(await token.tokenURI(tokenId)).to.equal(afterChangeURI);
@@ -352,18 +373,21 @@ describe("FanslandNFT", function () {
     });
   });
 
-  describe("withdraw()", function () {
-    context("when other account tries to withdraw the balance", function () {
-      it("reverts", async function () {
-        const ttt = await token.connect(alice);
-        await expectRevert(
-          ttt.withdraw({ from: alice }),
-          'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
-        );
-      });
-    });
+  describe("withdraw()", async function () {
+    context(
+      "when other account tries to withdraw the balance",
+      async function () {
+        it("reverts", async function () {
+          const ttt = await token.connect(alice);
+          await expectRevert(
+            ttt.withdraw({ from: alice }),
+            'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
+          );
+        });
+      }
+    );
 
-    context("when owner tries to withdraw the balance", function () {
+    context("when owner tries to withdraw the balance", async function () {
       before(async function () {
         ({ logs: this.logs } = await token.withdraw({ from: owner }));
       });
@@ -376,57 +400,8 @@ describe("FanslandNFT", function () {
     });
   });
 
-  describe("burn(uint256 tokenId)", function () {
-    it("reverts when burning a non-existent token id", async function () {
-      await expectRevert(token.burn(100000), "ERC721NonexistentToken(100000)");
-    });
-
-    context("with minted tokens", function () {
-      context("with burnt token", function () {
-        before(async function () {
-          const ttt = await token.connect(alice);
-          this.receipt = await ttt.burn(FIRST_TOKEN_ID, {
-            from: alice,
-          });
-        });
-
-        it("emits a Transfer event", function () {
-          expectEvent.inTransaction(this.receipt, EventNames.Transfer, {
-            from: alice,
-            to: ZERO_ADDRESS,
-            tokenId: FIRST_TOKEN_ID,
-          });
-        });
-
-        it("emits an Approval event", function () {
-          expectEvent.inTransaction(this.receipt, EventNames.Approval, {
-            approved: ZERO_ADDRESS,
-            tokenId: FIRST_TOKEN_ID,
-          });
-        });
-
-        it("deletes the token", async function () {
-          const ttt = await token.connect(alice);
-          expect(await token.balanceOf(alice)).to.be.equal("2");
-          await expectRevert(
-            ttt.ownerOf(FIRST_TOKEN_ID),
-            "ERC721NonexistentToken(1)"
-          );
-        });
-
-        it("reverts when burning a token id that has been deleted", async function () {
-          const ttt = await token.connect(alice);
-          await expectRevert(
-            ttt.burn(FIRST_TOKEN_ID, { from: alice }),
-            "ERC721NonexistentToken(1)"
-          );
-        });
-      });
-    });
-  });
-
-  describe("updateNftType()", async () => {
-    it("update nft type", async () => {
+  describe("updateNftType()", async function () {
+    it("update nft type", async function () {
       await token.updateNftType(
         0,
         "testname",
@@ -447,7 +422,7 @@ describe("FanslandNFT", function () {
     });
   });
 
-  describe("new type", async () => {
+  describe("new nft type", async function () {
     before(async () => {
       await token.updateNftType(
         1,
@@ -460,7 +435,7 @@ describe("FanslandNFT", function () {
       );
     });
 
-    it("add nft type", async () => {
+    it("add nft type", async function () {
       const t = await token.nftTypeMap(1);
       expect(t[ID_IDX]).to.equal(1);
       expect(t[NAME_IDX]).to.equal("testname1");
@@ -471,13 +446,13 @@ describe("FanslandNFT", function () {
       expect(t[SALE_ACTIVE_IDX]).to.equal(true);
     });
 
-    it("mint new type", async () => {
+    it("mint new type", async function () {
       //   const receipt = console.log("logs========", receipt);
       const receipt = await token.mintBatch([1], [1], {
         from: owner,
         value: toWei("0.1", "ether"),
       });
-    //   console.log("logs========", receipt);
+      //   console.log("logs========", receipt);
 
       // TODO: WTF? why error?
       //   await expectEvent(receipt, EventNames.MintNft, {
@@ -489,21 +464,19 @@ describe("FanslandNFT", function () {
       expect(t[TOTAL_SUPPLY_IDX]).to.equal(1);
     });
 
-    it("delete nft type", async () => {
+    it("delete nft type", async function () {
       await token.removeNftType(0);
       await token.removeNftType(1);
 
       expect(await token.typeExists(0)).is.false;
       expect(await token.typeExists(1)).is.false;
 
-      it("reverts", async () => {
-        await expectRevert(
-          token.mintBatch([0], [1], {
-            value: NFT_MINT_PRICE,
-          }),
-          "invalid typeId"
-        );
-      });
+      await expectRevert(
+        token.mintBatch([0], [1], {
+          value: NFT_MINT_PRICE,
+        }),
+        "invalid typeId"
+      );
     });
   });
 

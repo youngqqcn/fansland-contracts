@@ -76,7 +76,6 @@ contract FanslandNFT is
         openSale = true;
         baseURI = "https://mynft.com/";
         maxSupply = 100000;
-        // nftPrice = 0;
 
         // TODO: init with some data
         nftTypeMap[0] = NftType({
