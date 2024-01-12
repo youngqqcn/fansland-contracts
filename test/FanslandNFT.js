@@ -302,6 +302,59 @@ describe("FanslandNFT", function () {
           .to.emit(token, EventNames.Transfer)
           .withArgs(ZERO_ADDRESS, owner, 1);
       });
+
+      it("mint batch", async function () {
+        const mintCount = 100;
+        await expect(
+          await UsdtToken.approve(token, mintCount * 0.001 * 1000000, {
+            from: owner,
+          })
+        )
+          .to.emit(UsdtToken, "Approval")
+          .withArgs(owner, token, mintCount * 0.001 * 1000000);
+
+        const receipt = await token.mintBatchByErc20(
+          UsdtToken,
+          [0],
+          [mintCount],
+          {
+            from: owner,
+          }
+        );
+        await expect(receipt)
+          .to.emit(token, EventNames.MintNft)
+          .withArgs(ZERO_ADDRESS, owner, 1 + mintCount, 0);
+
+        await expect(receipt)
+          .to.emit(token, EventNames.Transfer)
+          .withArgs(ZERO_ADDRESS, owner, 1 + mintCount);
+      });
+    });
+
+    context("revert", async function () {
+      it("mint with not support token address", async function () {
+        await expect(
+          token.mintBatchByErc20(token, [0], [1], {
+            from: owner,
+          })
+        ).to.be.revertedWith("payment token not support");
+      });
+
+      it("mint with not match args", async function () {
+        await expect(
+          token.mintBatchByErc20(token, [0], [1, 2], {
+            from: owner,
+          })
+        ).to.be.revertedWith("args length not match");
+      });
+
+      it("mint with not enough usdt", async function () {
+        await expect(
+          token.mintBatchByErc20(UsdtToken, [0], [100], {
+            from: owner,
+          })
+        ).to.reverted;
+      });
     });
   });
 

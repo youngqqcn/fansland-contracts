@@ -147,34 +147,29 @@ contract FanslandNFT is
     ) internal view returns (uint256) {
         require(typeIds.length == quantities.length, "args length not match");
         uint256 totalPrice = 0;
-        // uint256 totalQuantity = 0;
         for (uint i = 0; i < typeIds.length; i++) {
             uint256 typeId = typeIds[i];
             require(typeExists[typeId], "invalid typeId");
 
-            (bool okAdd1, uint256 resultAdd1) = Math.tryAdd(
+            bool ok = false;
+            uint256 result = 0;
+            (ok, result) = Math.tryAdd(
                 nftTypeMap[typeId].totalSupply,
                 quantities[i]
             );
-            require(okAdd1, "quantity overflow");
+            require(ok, "quantity overflow");
             require(
-                nftTypeMap[typeId].maxSupply > resultAdd1,
+                nftTypeMap[typeId].maxSupply >= result,
                 "Purchase would exceed max supply of NFTs"
             );
 
-            (bool okMul, uint256 resultMul) = Math.tryMul(
-                nftTypeMap[typeId].price,
-                quantities[i]
-            );
-            require(okMul, "mul overflow");
+            (ok, result) = Math.tryMul(nftTypeMap[typeId].price, quantities[i]);
+            require(ok, "mul overflow");
 
-            (bool okAdd, uint256 resultAdd) = Math.tryAdd(
-                resultMul,
-                totalPrice
-            );
-            require(okAdd, "add overflow");
+            (ok, result) = Math.tryAdd(result, totalPrice);
+            require(ok, "add overflow");
 
-            totalPrice = resultAdd;
+            totalPrice = result;
         }
         return totalPrice;
     }
