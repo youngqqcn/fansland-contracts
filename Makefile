@@ -17,7 +17,8 @@ remixd:
 .PHONY: remixd
 clean:
 	npx hardhat clean
-	sudo rm -rf artifacts cache
+	sudo rm -rf artifacts cache .deploys contracts/artifacts
+
 
 
 
