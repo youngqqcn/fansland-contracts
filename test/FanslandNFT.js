@@ -372,7 +372,7 @@ describe("FanslandNFT", function () {
 
       const ttt2 = await token.connect(john);
       const uuu2 = await UsdtToken.connect(john);
-      await uuu2.approve(token, 10000 * 1000000, {
+      await uuu2.approve(token, 2 * 0.001 * 1000000, {
         from: john,
       });
       await ttt2.mintBatchByErc20(UsdtToken, [0], [2], {
@@ -381,7 +381,7 @@ describe("FanslandNFT", function () {
 
       const ttt3 = await token.connect(bob);
       const uuu3 = await UsdtToken.connect(bob);
-      await uuu3.approve(token, 10000 * 1000000, {
+      await uuu3.approve(token, 2 * 0.001 * 1000000, {
         from: bob,
       });
       await ttt3.mintBatchByErc20(UsdtToken, [0], [2], {
@@ -409,8 +409,9 @@ describe("FanslandNFT", function () {
         const w = await UsdtToken.balanceOf(owner);
 
         expect(w + b + j).to.equal(this.ownerBalance + this.johnBalance + this.bobBalance);
-        expect(w - this.ownerBalance).equal(this.johnBalance - j + this.bobBalance - b);
-        // expect( await UsdtToken.allowance(john, token)  );
+        expect(w - this.ownerBalance).equal(this.johnBalance - j + this.bobBalance - b).equal(4 * 0.001 * 1000000);
+        expect( await UsdtToken.allowance(john, token)  ).equal(0);
+        expect( await UsdtToken.allowance(bob, token)  ).equal(0);
       });
     });
   });
