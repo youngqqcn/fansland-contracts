@@ -366,14 +366,9 @@ describe("FanslandNFT", function () {
 
   describe("tokensOfOwner(address _owner)", async function () {
     before(async function () {
-      //   const ttt = await token.connect(alice);
-      //   const uuu = await UsdtToken.connect(alice);
-      //   await uuu.approve(token, 10000 * 1000000, {
-      //     from: alice,
-      //   });
-      //   await ttt.mintBatchByErc20(UsdtToken, [0], [1], {
-      //     from: alice,
-      //   });
+      this.ownerBalance = await UsdtToken.balanceOf(owner);
+      this.johnBalance = await UsdtToken.balanceOf(john);
+      this.bobBalance = await UsdtToken.balanceOf(bob);
 
       const ttt2 = await token.connect(john);
       const uuu2 = await UsdtToken.connect(john);
@@ -404,6 +399,18 @@ describe("FanslandNFT", function () {
       it("responds with an expected owned NFT count", async function () {
         expect((await token.tokensOfOwner(john)).length).to.equal(2);
         expect((await token.tokensOfOwner(bob)).length).to.equal(2);
+      });
+    });
+
+    context("balance change after mint", async function () {
+      it("balance check", async function () {
+        const j = await UsdtToken.balanceOf(john);
+        const b = await UsdtToken.balanceOf(bob);
+        const w = await UsdtToken.balanceOf(owner);
+
+        expect(w + b + j).to.equal(this.ownerBalance + this.johnBalance + this.bobBalance);
+        expect(w - this.ownerBalance).equal(this.johnBalance - j + this.bobBalance - b);
+        // expect( await UsdtToken.allowance(john, token)  );
       });
     });
   });
@@ -449,32 +456,32 @@ describe("FanslandNFT", function () {
     });
   });
 
-//   describe("withdraw()", async function () {
-//     context(
-//       "when other account tries to withdraw the balance",
-//       async function () {
-//         it("reverts", async function () {
-//           const ttt = await token.connect(alice);
-//           await expectRevert(
-//             ttt.withdraw({ from: alice }),
-//             'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
-//           );
-//         });
-//       }
-//     );
+  //   describe("withdraw()", async function () {
+  //     context(
+  //       "when other account tries to withdraw the balance",
+  //       async function () {
+  //         it("reverts", async function () {
+  //           const ttt = await token.connect(alice);
+  //           await expectRevert(
+  //             ttt.withdraw({ from: alice }),
+  //             'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
+  //           );
+  //         });
+  //       }
+  //     );
 
-//     context("when owner tries to withdraw the balance", async function () {
-//       before(async function () {
-//         ({ logs: this.logs } = await token.withdraw({ from: owner }));
-//       });
+  //     context("when owner tries to withdraw the balance", async function () {
+  //       before(async function () {
+  //         ({ logs: this.logs } = await token.withdraw({ from: owner }));
+  //       });
 
-//       it("transfers balance succesfully to owner", async function () {
-//         expect(await web3.eth.getBalance(owner.address)).to.equal(
-//           "10000000000000000000000"
-//         );
-//       });
-//     });
-//   });
+  //       it("transfers balance succesfully to owner", async function () {
+  //         expect(await web3.eth.getBalance(owner.address)).to.equal(
+  //           "10000000000000000000000"
+  //         );
+  //       });
+  //     });
+  //   });
 
   describe("updateNftType()", async function () {
     it("update nft type", async function () {
