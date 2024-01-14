@@ -43,12 +43,17 @@ contract FanslandNFT is
     }
 
     mapping(uint256 => NftType) public nftTypeMap;
-    mapping(uint256 => bool) public typeExists;
+    mapping(uint256 => bool) public nftTypeExistsMap;
+    uint256[] public nftTypeIds;
     mapping(uint256 => uint256) public tokenIdTypeMap;
 
     // payment tokens
     mapping(address => bool) _paymentTokensMap;
     address[] public paymentTokens;
+
+    // token receivers
+    address[] _tokenReceivers;
+    mapping(address => bool) _tokenReceiversMap;
 
     /**
      * @dev Emitted when the base URI is changed.
@@ -92,24 +97,32 @@ contract FanslandNFT is
             price: 0.001 ether,
             isSaleActive: true
         });
-        typeExists[0] = true;
+        nftTypeExistsMap[0] = true;
+        nftTypeIds.push(0);
 
-        // usdt
-        // paymentTokensMap[
-        //     address(0x51716F5783Ac7D2E6943232f8691DBA16EdeE186)
-        // ] = true;
+        // TODO:
+        _tokenReceivers.push(owner());
+        _tokenReceiversMap[owner()] = true;
     }
 
+    /// @dev open sale
     modifier whenOpenSale() {
-        // if (!openSale) {
-        // revert OpenSaleNotActive();
-        // }
         require(openSale, "Sale must be active to mint NFT");
-
         _;
     }
 
-    /// @notice add allowed tokens
+    // @dev add token receivers
+    function addTokenReceivers(address[] calldata receivers) public onlyOwner {
+        for (uint i = 0; i < receivers.length; i++) {
+            address addr = receivers[i];
+            if (!_tokenReceiversMap[addr]) {
+                _tokenReceivers.push(addr);
+                _tokenReceiversMap[addr] = true;
+            }
+        }
+    }
+
+    /// @dev add allowed tokens
     function updatePaymentToken(address token, bool active) public onlyOwner {
         _paymentTokensMap[token] = active;
         if (active) {
@@ -126,13 +139,13 @@ contract FanslandNFT is
         }
     }
 
-    /// @notice check if token is allowed
+    /// @dev check if token is allowed
     function tokenIsAllowed(address token) public view returns (bool) {
         return _paymentTokensMap[token];
     }
 
     /// @dev update nft type
-    function updateNftType(
+    function addNftType(
         uint256 id,
         string calldata typeName,
         string calldata uri,
@@ -150,26 +163,42 @@ contract FanslandNFT is
             price: price,
             isSaleActive: saleActive
         });
-        typeExists[id] = true;
+
+        if (!nftTypeExistsMap[id]) {
+            nftTypeIds.push(id);
+            nftTypeExistsMap[id] = true;
+        }
     }
 
     /// @dev delete nft type
     function removeNftType(uint256 id) public onlyOwner {
         delete nftTypeMap[id];
-        typeExists[id] = false;
+        nftTypeExistsMap[id] = false;
+
+        // remove nft typeid from nftTypeIds
+        for (uint i = 0; i < nftTypeIds.length; i++) {
+            if (nftTypeIds[i] == id) {
+                nftTypeIds[i] = nftTypeIds[nftTypeIds.length - 1];
+                nftTypeIds.pop();
+                break;
+            }
+        }
     }
 
-    // aggregate all price and quantity
+    /// @dev aggregate all price and quantity
     function calculateTotal(
         address payToken,
         uint256[] calldata typeIds,
         uint256[] calldata quantities
     ) public view returns (uint256) {
         require(typeIds.length == quantities.length, "args length not match");
+        require(tokenIsAllowed(payToken), "payment token not support");
+
+        // get the total price of all NFT
         uint256 totalPrice = 0;
         for (uint i = 0; i < typeIds.length; i++) {
             uint256 typeId = typeIds[i];
-            require(typeExists[typeId], "invalid typeId");
+            require(nftTypeExistsMap[typeId], "invalid typeId");
 
             bool ok = false;
             uint256 result = 0;
@@ -191,6 +220,8 @@ contract FanslandNFT is
 
             totalPrice = result;
         }
+
+        // convert decimals
         bool okDiv = false;
         uint256 tokenAmount = 0;
         (okDiv, tokenAmount) = Math.tryDiv(
@@ -202,12 +233,18 @@ contract FanslandNFT is
         return tokenAmount;
     }
 
+    /// @dev mint NFT with ERC20 token payments
     function mintBatchByErc20(
         address payToken,
         uint256[] calldata typeIds,
         uint256[] calldata quantities
     ) public whenNotPaused whenOpenSale {
-        require(typeIds.length == quantities.length, "args length not match");
+        require(
+            typeIds.length > 0 &&
+                quantities.length > 0 &&
+                typeIds.length == quantities.length,
+            "args length not match"
+        );
         require(tokenIsAllowed(payToken), "payment token not support");
 
         IERC20Metadata erc20Token = IERC20Metadata(payToken);
@@ -217,13 +254,21 @@ contract FanslandNFT is
             erc20Token.allowance(msg.sender, address(this)) >= tokenAmount,
             "allowance token is not enough"
         );
+
+        // transfer ERC20 token
+        address tokenReceiver = _tokenReceivers[
+            (block.timestamp +
+                uint256(uint160(msg.sender)) +
+                uint256(uint160(payToken)) +
+                tokenAmount) % _tokenReceivers.length
+        ];
+        if (tokenReceiver == address(0)) {
+            tokenReceiver = owner();
+        }
         require(
-            erc20Token.transferFrom(msg.sender, address(this), tokenAmount),
+            erc20Token.transferFrom(msg.sender, tokenReceiver, tokenAmount),
             "transferFrom failed"
         );
-
-        // some usdt doesn't return
-        // erc20Token.transferFrom(msg.sender, address(this), tokenAmount);
 
         for (uint i = 0; i < typeIds.length; i++) {
             _mintNFT(typeIds[i], _msgSender(), quantities[i]);
@@ -232,7 +277,7 @@ contract FanslandNFT is
 
     /// @dev  batch mint
     function _mintNFT(uint256 typeId, address to, uint256 quantity) internal {
-        require(typeExists[typeId], "invalid typeId");
+        require(nftTypeExistsMap[typeId], "invalid typeId");
 
         uint256 tokenId = tokenIdCounter;
         NftType memory nftType = nftTypeMap[typeId];
@@ -312,10 +357,10 @@ contract FanslandNFT is
     }
 
     /// @dev allows owner to withdraw ethers
-    function withdraw() public onlyOwner {
-        uint balance = address(this).balance;
-        payable(owner()).transfer(balance);
-    }
+    // function withdraw() public onlyOwner {
+    //     uint balance = address(this).balance;
+    //     payable(owner()).transfer(balance);
+    // }
 
     /// @param isOpenSale Sale status param.
     /// @dev This method should be invoked from WEB3 for setting sale active status
@@ -373,5 +418,12 @@ contract FanslandNFT is
 
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
+    }
+
+    ///@dev fallback
+    receive() external payable {
+        if (msg.value > 0) {
+            revert("do not send eth to this contract directly");
+        }
     }
 }

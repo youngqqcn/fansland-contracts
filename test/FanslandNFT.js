@@ -449,36 +449,36 @@ describe("FanslandNFT", function () {
     });
   });
 
-  describe("withdraw()", async function () {
-    context(
-      "when other account tries to withdraw the balance",
-      async function () {
-        it("reverts", async function () {
-          const ttt = await token.connect(alice);
-          await expectRevert(
-            ttt.withdraw({ from: alice }),
-            'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
-          );
-        });
-      }
-    );
+//   describe("withdraw()", async function () {
+//     context(
+//       "when other account tries to withdraw the balance",
+//       async function () {
+//         it("reverts", async function () {
+//           const ttt = await token.connect(alice);
+//           await expectRevert(
+//             ttt.withdraw({ from: alice }),
+//             'OwnableUnauthorizedAccount("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")'
+//           );
+//         });
+//       }
+//     );
 
-    context("when owner tries to withdraw the balance", async function () {
-      before(async function () {
-        ({ logs: this.logs } = await token.withdraw({ from: owner }));
-      });
+//     context("when owner tries to withdraw the balance", async function () {
+//       before(async function () {
+//         ({ logs: this.logs } = await token.withdraw({ from: owner }));
+//       });
 
-      it("transfers balance succesfully to owner", async function () {
-        expect(await web3.eth.getBalance(owner.address)).to.equal(
-          "10000000000000000000000"
-        );
-      });
-    });
-  });
+//       it("transfers balance succesfully to owner", async function () {
+//         expect(await web3.eth.getBalance(owner.address)).to.equal(
+//           "10000000000000000000000"
+//         );
+//       });
+//     });
+//   });
 
   describe("updateNftType()", async function () {
     it("update nft type", async function () {
-      await token.updateNftType(
+      await token.addNftType(
         0,
         "testname",
         "testuri",
@@ -500,7 +500,7 @@ describe("FanslandNFT", function () {
 
   describe("new nft type", async function () {
     before(async () => {
-      await token.updateNftType(
+      await token.addNftType(
         1,
         "testname1",
         "testuri1",
@@ -537,11 +537,14 @@ describe("FanslandNFT", function () {
     });
 
     it("delete nft type", async function () {
+      expect(await token.nftTypeExistsMap(0)).is.true;
+      expect(await token.nftTypeExistsMap(1)).is.true;
+
       await token.removeNftType(0);
       await token.removeNftType(1);
 
-      expect(await token.typeExists(0)).is.false;
-      expect(await token.typeExists(1)).is.false;
+      expect(await token.nftTypeExistsMap(0)).is.false;
+      expect(await token.nftTypeExistsMap(1)).is.false;
 
       await expect(
         token.mintBatchByErc20(UsdtToken, [0], [1])
@@ -558,10 +561,7 @@ describe("FanslandNFT", function () {
           to: token,
           value: toWei("0.01", "ether"),
         })
-      )
-        .to.be.revertedWithoutReason
-        // "function selector was not recognized and there's no fallback nor receive function"
-        ();
+      ).to.be.revertedWith("do not send eth to this contract directly");
     });
   });
 
