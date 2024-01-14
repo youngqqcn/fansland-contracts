@@ -45,7 +45,10 @@ contract FanslandNFT is
     mapping(uint256 => NftType) public nftTypeMap;
     mapping(uint256 => bool) public typeExists;
     mapping(uint256 => uint256) public tokenIdTypeMap;
-    mapping(address => bool) public paymentTokensMap;
+
+    // payment tokens
+    mapping(address => bool) _paymentTokensMap;
+    address[] public paymentTokens;
 
     /**
      * @dev Emitted when the base URI is changed.
@@ -61,7 +64,9 @@ contract FanslandNFT is
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() initializer {}
+    // constructor() initializer {
+    //     _disableInitializers();
+    // }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
@@ -90,9 +95,9 @@ contract FanslandNFT is
         typeExists[0] = true;
 
         // usdt
-        paymentTokensMap[
-            address(0x51716F5783Ac7D2E6943232f8691DBA16EdeE186)
-        ] = true;
+        // paymentTokensMap[
+        //     address(0x51716F5783Ac7D2E6943232f8691DBA16EdeE186)
+        // ] = true;
     }
 
     modifier whenOpenSale() {
@@ -104,12 +109,26 @@ contract FanslandNFT is
         _;
     }
 
-    /// @dev set erc20 contract
-    function updatePaymentToken(
-        address erc20Contract,
-        bool active
-    ) public onlyOwner {
-        paymentTokensMap[erc20Contract] = active;
+    /// @notice add allowed tokens
+    function updatePaymentToken(address token, bool active) public onlyOwner {
+        _paymentTokensMap[token] = active;
+        if (active) {
+            paymentTokens.push(token);
+        } else {
+            // remove token
+            for (uint i = 0; i < paymentTokens.length; i++) {
+                if (paymentTokens[i] == token) {
+                    paymentTokens[i] = paymentTokens[paymentTokens.length - 1];
+                    paymentTokens.pop();
+                    break;
+                }
+            }
+        }
+    }
+
+    /// @notice check if token is allowed
+    function tokenIsAllowed(address token) public view returns (bool) {
+        return _paymentTokensMap[token];
     }
 
     /// @dev update nft type
@@ -142,6 +161,7 @@ contract FanslandNFT is
 
     // aggregate all price and quantity
     function calculateTotal(
+        address payToken,
         uint256[] calldata typeIds,
         uint256[] calldata quantities
     ) public view returns (uint256) {
@@ -171,7 +191,15 @@ contract FanslandNFT is
 
             totalPrice = result;
         }
-        return totalPrice;
+        bool okDiv = false;
+        uint256 tokenAmount = 0;
+        (okDiv, tokenAmount) = Math.tryDiv(
+            totalPrice,
+            10 ** (18 - IERC20Metadata(payToken).decimals())
+        );
+        require(okDiv, "div overflow");
+
+        return tokenAmount;
     }
 
     function mintBatchByErc20(
@@ -180,40 +208,22 @@ contract FanslandNFT is
         uint256[] calldata quantities
     ) public whenNotPaused whenOpenSale {
         require(typeIds.length == quantities.length, "args length not match");
-        require(paymentTokensMap[payToken], "payment token not support");
+        require(tokenIsAllowed(payToken), "payment token not support");
 
         IERC20Metadata erc20Token = IERC20Metadata(payToken);
-        uint256 totalPriceInWei = calculateTotal(typeIds, quantities);
-        (bool okDiv, uint256 tokenAmount) = Math.tryDiv(
-            totalPriceInWei,
-            10 ** (18 - erc20Token.decimals())
-        );
-        require(okDiv, "div overflow");
+        uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
 
         require(
+            erc20Token.allowance(msg.sender, address(this)) >= tokenAmount,
+            "allowance token is not enough"
+        );
+        require(
             erc20Token.transferFrom(msg.sender, address(this), tokenAmount),
-            "transfer failed"
+            "transferFrom failed"
         );
 
         // some usdt doesn't return
         // erc20Token.transferFrom(msg.sender, address(this), tokenAmount);
-
-        for (uint i = 0; i < typeIds.length; i++) {
-            _mintNFT(typeIds[i], _msgSender(), quantities[i]);
-        }
-    }
-
-    // TODO: remove this function
-    /// @dev batch mint
-    /// @param typeIds  nft types
-    /// @param quantities quantitys
-    function mintBatch(
-        uint256[] calldata typeIds,
-        uint256[] calldata quantities
-    ) public payable whenNotPaused whenOpenSale {
-        require(typeIds.length == quantities.length, "args length not match");
-        uint256 totalPrice = calculateTotal(typeIds, quantities);
-        require(totalPrice <= msg.value, "Ether value sent is not correct");
 
         for (uint i = 0; i < typeIds.length; i++) {
             _mintNFT(typeIds[i], _msgSender(), quantities[i]);

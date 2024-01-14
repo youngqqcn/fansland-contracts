@@ -76,10 +76,18 @@ describe("FanslandNFT", function () {
     // set test USDT erc20 contract
     await token.updatePaymentToken(UsdtToken, true);
 
-
     // 升级
     // token = await upgradeProxy(tokenV1.address, NFT);
     console.debug(`New NFT contract deployed - address: ${token.target}`);
+
+    await UsdtToken.approve(token, 10000 * 1000000, {
+      from: owner,
+    });
+
+    // const tUsdtToken = await UsdtToken.connect(alice);
+    // await tUsdtToken.approve(tUsdtToken, 10000 * 1000000, {
+    //   from: alice,
+    // });
   }
 
   before(async function () {
@@ -174,10 +182,10 @@ describe("FanslandNFT", function () {
     context("when minting with paused contract", async function () {
       it("cannot mint while paused", async function () {
         await token.pause({ from: owner });
-        const ttt = await token.connect(alice);
+        // const ttt = await token.connect(alice);
         await expect(
-          ttt.mintBatch([0], [1], { from: alice, value: NFT_MINT_PRICE })
-        ).to.be.revertedWithCustomError(ttt, "EnforcedPause");
+          token.mintBatchByErc20(UsdtToken, [0], [1], { from: owner })
+        ).to.be.revertedWithCustomError(token, "EnforcedPause");
         await token.unpause({ from: owner });
       });
     });
@@ -210,13 +218,15 @@ describe("FanslandNFT", function () {
     );
   });
 
-  describe("mintBatch()", async function () {
+  describe("mintBatchByErc20()", async function () {
     context("when sale is in-active, on trying to mint", async function () {
       it("reverts", async function () {
         const ttt = await token.connect(alice);
         await token.setSaleActive(false, { from: owner });
         await expectRevert(
-          ttt.mintBatch([0], [1], { from: alice, value: NFT_MINT_PRICE }),
+          ttt.mintBatchByErc20(UsdtToken, [0], [1], {
+            from: alice,
+          }),
           "Sale must be active to mint NFT"
         );
         await token.setSaleActive(true, { from: owner });
@@ -227,11 +237,10 @@ describe("FanslandNFT", function () {
       it("reverts", async function () {
         const ttt = await token.connect(alice);
         await expectRevert(
-          ttt.mintBatch([0], [1], {
+          ttt.mintBatchByErc20(UsdtToken, [0], [1], {
             from: alice,
-            value: INCORRECT_NFT_MINT_PRICE,
           }),
-          "Ether value sent is not correct"
+          "allowance token is not enough"
         );
       });
     });
@@ -239,10 +248,8 @@ describe("FanslandNFT", function () {
     context("with minted token", async function () {
       before(async function () {
         const firstTokenId = "0";
-        this.ttt = await token.connect(alice);
-        this.receipt = await this.ttt.mintBatch([0], [1], {
-          from: alice,
-          value: NFT_MINT_PRICE,
+        this.receipt = await token.mintBatchByErc20(UsdtToken, [0], [1], {
+          from: owner,
         });
       });
 
@@ -250,30 +257,28 @@ describe("FanslandNFT", function () {
         // console.log("==============555", this.txhash);
         // console.log("==============555777", this.txhash.hash);
         await expect(this.receipt)
-          .to.emit(this.ttt, EventNames.Transfer)
-          .withArgs(ZERO_ADDRESS, alice, 0);
+          .to.emit(token, EventNames.Transfer)
+          .withArgs(ZERO_ADDRESS, owner, 0);
       });
 
       it("MintNft event", async function () {
         await expect(this.receipt)
-          .to.emit(this.ttt, EventNames.MintNft)
-          .withArgs(ZERO_ADDRESS, alice, 0, 0);
+          .to.emit(token, EventNames.MintNft)
+          .withArgs(ZERO_ADDRESS, owner, 0, 0);
       });
 
       it("creates the token", async function () {
         const firstTokenId = 0n;
         // const ttt = await token.connect(alice);
-        await expect(await this.ttt.balanceOf(alice)).to.equal("1");
-        await expect(await this.ttt.ownerOf(firstTokenId)).to.equal(alice);
+        await expect(await token.balanceOf(owner)).to.equal("1");
+        await expect(await token.ownerOf(firstTokenId)).to.equal(owner);
       });
     });
 
     context("mint with wrong typeId ", async function () {
       it("reverts", async () => {
         await expectRevert(
-          token.mintBatch([100001], [1], {
-            value: NFT_MINT_PRICE,
-          }),
+          token.mintBatchByErc20(UsdtToken, [100001], [1], { from: owner }),
           "invalid typeId"
         );
       });
@@ -361,17 +366,32 @@ describe("FanslandNFT", function () {
 
   describe("tokensOfOwner(address _owner)", async function () {
     before(async function () {
-      const ttt = await token.connect(alice);
-      await ttt.mintBatch([0], [1], { from: alice, value: NFT_MINT_PRICE });
-      await ttt.mintBatch([0], [1], { from: alice, value: NFT_MINT_PRICE });
+      //   const ttt = await token.connect(alice);
+      //   const uuu = await UsdtToken.connect(alice);
+      //   await uuu.approve(token, 10000 * 1000000, {
+      //     from: alice,
+      //   });
+      //   await ttt.mintBatchByErc20(UsdtToken, [0], [1], {
+      //     from: alice,
+      //   });
 
       const ttt2 = await token.connect(john);
-      await ttt2.mintBatch([0], [1], { from: john, value: NFT_MINT_PRICE });
-      await ttt2.mintBatch([0], [1], { from: john, value: NFT_MINT_PRICE });
+      const uuu2 = await UsdtToken.connect(john);
+      await uuu2.approve(token, 10000 * 1000000, {
+        from: john,
+      });
+      await ttt2.mintBatchByErc20(UsdtToken, [0], [2], {
+        from: john,
+      });
 
       const ttt3 = await token.connect(bob);
-      await ttt3.mintBatch([0], [1], { from: bob, value: NFT_MINT_PRICE });
-      await ttt3.mintBatch([0], [1], { from: bob, value: NFT_MINT_PRICE });
+      const uuu3 = await UsdtToken.connect(bob);
+      await uuu3.approve(token, 10000 * 1000000, {
+        from: bob,
+      });
+      await ttt3.mintBatchByErc20(UsdtToken, [0], [2], {
+        from: bob,
+      });
     });
 
     context("when queried for address with no token", async function () {
@@ -382,7 +402,6 @@ describe("FanslandNFT", function () {
 
     context("when queried for address with tokens", async function () {
       it("responds with an expected owned NFT count", async function () {
-        //   expect((await token.tokensOfOwner(alice)).length).to.equal(3);
         expect((await token.tokensOfOwner(john)).length).to.equal(2);
         expect((await token.tokensOfOwner(bob)).length).to.equal(2);
       });
@@ -487,7 +506,7 @@ describe("FanslandNFT", function () {
         "testuri1",
         99,
         0,
-        toWei("0.1", "ether"),
+        10_000_000,
         true
       );
     });
@@ -499,23 +518,19 @@ describe("FanslandNFT", function () {
       expect(t[URI_IDX]).to.equal("testuri1");
       expect(t[MAX_SUPPLY_IDX]).to.equal(99);
       expect(t[TOTAL_SUPPLY_IDX]).to.equal(0);
-      expect(t[PRICE_IDX]).to.equal(toWei("0.1", "ether"));
+      expect(t[PRICE_IDX]).to.equal(10_000_000);
       expect(t[SALE_ACTIVE_IDX]).to.equal(true);
     });
 
     it("mint new type", async function () {
       //   const receipt = console.log("logs========", receipt);
-      const receipt = await token.mintBatch([1], [1], {
+      const receipt = await token.mintBatchByErc20(UsdtToken, [1], [1], {
         from: owner,
-        value: toWei("0.1", "ether"),
       });
-      //   console.log("logs========", receipt);
 
-      // TODO: WTF? why error?
-      //   await expectEvent(receipt, EventNames.MintNft, {
-      // from: ZERO_ADDRESS,
-      // to: owner,
-      //   });
+      //   TODO: WTF? why error?
+      await expect(receipt).emit(token, EventNames.MintNft);
+      // .withArgs(ZERO_ADDRESS, owner, 106, 1);
 
       const t = await token.nftTypeMap(1);
       expect(t[TOTAL_SUPPLY_IDX]).to.equal(1);
@@ -528,12 +543,25 @@ describe("FanslandNFT", function () {
       expect(await token.typeExists(0)).is.false;
       expect(await token.typeExists(1)).is.false;
 
-      await expectRevert(
-        token.mintBatch([0], [1], {
-          value: NFT_MINT_PRICE,
-        }),
-        "invalid typeId"
-      );
+      await expect(
+        token.mintBatchByErc20(UsdtToken, [0], [1])
+      ).to.be.rejectedWith("invalid typeId");
+    });
+  });
+
+  describe("send ETH to contract", async function () {
+    it("reverts", async function () {
+      //   const r = await ;
+
+      await expect(
+        owner.sendTransaction({
+          to: token,
+          value: toWei("0.01", "ether"),
+        })
+      )
+        .to.be.revertedWithoutReason
+        // "function selector was not recognized and there's no fallback nor receive function"
+        ();
     });
   });
 
