@@ -6,7 +6,7 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
-async function main() {
+async function deploy() {
   //   const usdt = await hre.ethers.deployContract("USDT");
 
   const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
@@ -23,9 +23,31 @@ async function main() {
   console.log(r.hash);
 }
 
+async function upgrade() {
+    //   const usdt = await hre.ethers.deployContract("USDT");
+
+    const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
+    // token = await hre.upgrades.deployProxy(FanslandNFT, []);
+    token = await hre.upgrades.upgradeProxy("0x1ae803334c2Bd896ea1d80bb5fF2f3500A239E75", FanslandNFT, []);
+    await token.waitForDeployment();
+
+    console.log(`FanslandNFT contract: ${token.target}`);
+
+    // const r = await token.updatePaymentToken(
+    //   "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e",
+    //   true
+    // );
+    // console.log(r.hash);
+  }
+
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main().catch((error) => {
+deploy().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+// upgrade().catch((error) => {
+//     console.error(error);
+//     process.exitCode = 1;
+//   });

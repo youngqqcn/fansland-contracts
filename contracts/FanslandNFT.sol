@@ -292,10 +292,10 @@ contract FanslandNFT is
             _setTokenURI(curTokenId, nftType.uri);
 
             // emit MintNft event
-            emit MintNft(address(0), to, curTokenId, typeId);
+            // emit MintNft(address(0), to, curTokenId, typeId);
         }
 
-        tokenIdTypeMap[typeId] += quantity;
+        tokenIdTypeMap[typeId] = typeId;
         nftTypeMap[typeId].totalSupply += quantity;
         tokenIdCounter += quantity;
     }
