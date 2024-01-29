@@ -7,11 +7,8 @@
 const hre = require("hardhat");
 
 async function deploy() {
-  //   const usdt = await hre.ethers.deployContract("USDT");
-
   const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
   token = await hre.upgrades.deployProxy(FanslandNFT, []);
-//   token = await hre.upgrades.upgradeProxy("0x4325741592F0c7892A1B61F18be6A1f4967bE6f8", FanslandNFT, []);
   await token.waitForDeployment();
 
   console.log(`FanslandNFT contract: ${token.target}`);
@@ -23,11 +20,27 @@ async function deploy() {
   console.log(r.hash);
 }
 
+async function fix() {
+    // const FanslandNFT =
+    let token = await hre.ethers.getContractAt("FanslandNFT", "0x8251D9B3a30c5c96391C5bCF7f531C227BEfDe2d");
+    // await token.waitForDeployment();
+
+    console.log(`FanslandNFT contract: ${token.target}`);
+
+    console.log("owner()" +  await token.owner() );
+
+    // 设置USDT地址: https://polygonscan.com/token/0xc2132d05d31c914a87c6611c10748aeb04b58e8f
+    const r = await token.updatePaymentToken(
+      "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+      true
+    );
+    console.log(r.hash);
+  }
+
+
 async function upgrade() {
-    //   const usdt = await hre.ethers.deployContract("USDT");
 
     const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
-    // token = await hre.upgrades.deployProxy(FanslandNFT, []);
     token = await hre.upgrades.upgradeProxy("0x1bc55f47140154ce86593f033523Ad701482Ded4", FanslandNFT, []);
     await token.waitForDeployment();
 
@@ -47,7 +60,12 @@ async function upgrade() {
 //   process.exitCode = 1;
 // });
 
-upgrade().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  });
+// upgrade().catch((error) => {
+//     console.error(error);
+//     process.exitCode = 1;
+//   });
+
+// fix().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });

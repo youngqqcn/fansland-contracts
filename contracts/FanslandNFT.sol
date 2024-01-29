@@ -79,7 +79,7 @@ contract FanslandNFT is
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function initialize() public initializer {
-        __ERC721_init("Fansland", "FANS");
+        __ERC721_init("Fansland", "Fansland");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __Pausable_init();
@@ -96,15 +96,27 @@ contract FanslandNFT is
         // TODO: init with some data
         nftTypeMap[0] = NftType({
             id: 0,
-            name: "Fansland first NFT",
+            name: "Fansland type 0",
             uri: "uri/0",
-            maxSupply: 10000,
+            maxSupply: 100,
             totalSupply: 0,
-            price: 0.001 ether,
+            price: 0.0001 ether,
             isSaleActive: true
         });
         nftTypeExistsMap[0] = true;
         nftTypeIds.push(0);
+
+        nftTypeMap[1] = NftType({
+            id: 1,
+            name: "Fansland type 1",
+            uri: "uri/1",
+            maxSupply: 10,
+            totalSupply: 0,
+            price: 0.0003 ether,
+            isSaleActive: true
+        });
+        nftTypeExistsMap[1] = true;
+        nftTypeIds.push(1);
 
         // TODO:
         _tokenReceivers.push(owner());

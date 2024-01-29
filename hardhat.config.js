@@ -10,14 +10,27 @@ module.exports = {
     hardhat: {
       timeout: 600000,
     },
+    polygon: {
+      url: "https://polygon-mainnet.g.alchemy.com/v2/YClzyACPRcIQOYKhvWrWMj3sXaQcdXnP",
+      chainId: 137,
+      accounts: [process.env.POLYGON_PRIVATE_KEY],
+      //   gasPrice: 3_000_000_000,
+    },
+    // bsc: {
+    // //   url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
+    // //   chainId: 97,
+    // //   accounts: [process.env.BNB_TESTNET_PRIVATE_KEY],
+    // },
     mumbai: {
-      //   url: "https://rpc-mumbai.maticvigil.com",
-      //   url: "https://polygon-mumbai.api.onfinality.io/public",
       url: "https://polygon-mumbai.g.alchemy.com/v2/NJsreaaTReGW3P0jzESHWw9TIeBKZ3Ly",
       chainId: 80001,
       accounts: [process.env.MUMBAI_PRIVATE_KEY],
-      gasPrice: 3_000_000_000
-      // accounts: ["0xb5af422ef45bac10aa74cef3ba13c191586e0e8ada5c9e061e4c65566efcacae"]
+      gasPrice: 3_000_000_000,
+    },
+    bsctest: {
+      url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
+      chainId: 97,
+      accounts: [process.env.BNB_TESTNET_PRIVATE_KEY],
     },
   },
   solidity: {
@@ -39,6 +52,9 @@ module.exports = {
   etherscan: {
     apiKey: {
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
+      polygon: process.env.POLYGONSCAN_API_KEY,
+      bscTestnet: process.env.POLYGONSCAN_API_KEY,
+      bsc: process.env.POLYGONSCAN_API_KEY,
     },
   },
   sourcify: {
