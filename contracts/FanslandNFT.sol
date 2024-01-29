@@ -233,12 +233,13 @@ contract FanslandNFT is
         return tokenAmount;
     }
 
-    /// @dev mint NFT with ERC20 token payments
+    /// @dev mint NFT with ERC20 token paymentToken
+    // if openSale is true, it's mintable
     function mintBatchByErc20(
         address payToken,
         uint256[] calldata typeIds,
         uint256[] calldata quantities
-    ) public whenNotPaused whenOpenSale {
+    ) public whenOpenSale {
         require(
             typeIds.length > 0 &&
                 quantities.length > 0 &&
@@ -281,6 +282,7 @@ contract FanslandNFT is
 
         uint256 tokenId = tokenIdCounter;
         NftType memory nftType = nftTypeMap[typeId];
+        require(nftType.isSaleActive, "not open sale ticket");
         for (uint i = 0; i < quantity; i++) {
             uint256 curTokenId = tokenId + i;
             _mint(to, curTokenId);
@@ -320,8 +322,10 @@ contract FanslandNFT is
             ERC721Upgradeable,
             ERC721EnumerableUpgradeable
         )
-        whenNotPaused
-        returns (address)
+        returns (
+            // whenNotPaused
+            address
+        )
     {
         // TODO: more check add here
         return super._update(to, tokenId, auth);
@@ -376,13 +380,53 @@ contract FanslandNFT is
     }
 
     /// @dev This method should be invoked from WEB3 from owner's account to PAUSE the smart contract
+    ///
+    /// disallow NFT transfer
     function pause() public onlyOwner {
         _pause();
     }
 
     /// @dev This method should be invoked from WEB3 from owner's account to UNPAUSE the smart contract
+    ///
+    /// allow NFT transfer
     function unpause() public onlyOwner {
         _unpause();
+    }
+
+    /**
+     * @dev Transfers `tokenId` token from `from` to `to`.
+     *
+     * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721
+     * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must
+     * understand this adds an external call which potentially creates a reentrancy vulnerability.
+     *
+     * Requirements:
+     *
+     * - `from` cannot be the zero address.
+     * - `to` cannot be the zero address.
+     * - `tokenId` token must be owned by `from`.
+     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override(ERC721Upgradeable, IERC721) whenNotPaused {
+        super.transferFrom(from, to, tokenId);
+    }
+
+    /**
+     * @dev See {ERC721Upgradeable-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) public override(ERC721Upgradeable, IERC721) whenNotPaused {
+        super.safeTransferFrom(from, to, tokenId, data);
     }
 
     function tokenURI(

@@ -28,7 +28,7 @@ async function upgrade() {
 
     const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
     // token = await hre.upgrades.deployProxy(FanslandNFT, []);
-    token = await hre.upgrades.upgradeProxy("0x1ae803334c2Bd896ea1d80bb5fF2f3500A239E75", FanslandNFT, []);
+    token = await hre.upgrades.upgradeProxy("0x1bc55f47140154ce86593f033523Ad701482Ded4", FanslandNFT, []);
     await token.waitForDeployment();
 
     console.log(`FanslandNFT contract: ${token.target}`);
@@ -42,12 +42,12 @@ async function upgrade() {
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-deploy().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// deploy().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
 
-// upgrade().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-//   });
+upgrade().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });

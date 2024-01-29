@@ -2,9 +2,10 @@
 fansland contract
 
 
-usdt usdc 水龙头
 
-https://faucet.softbinator.com/
+https://mumbaifaucet.com/
+
+<!-- https://faucet.softbinator.com/ -->
 
 
 
