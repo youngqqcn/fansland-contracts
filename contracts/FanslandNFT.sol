@@ -68,6 +68,9 @@ contract FanslandNFT is
         uint256 typeId
     );
 
+    // transfer switch
+    bool public allowTransfer;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     // constructor() initializer {
     //     _disableInitializers();
@@ -82,6 +85,9 @@ contract FanslandNFT is
         __Pausable_init();
         __Ownable_init(msg.sender);
         __ERC721Burnable_init();
+
+        // allow transfer by default
+        allowTransfer = true;
 
         openSale = true;
         baseURI = "https://mynft.com/";
@@ -109,6 +115,17 @@ contract FanslandNFT is
     modifier whenOpenSale() {
         require(openSale, "Sale must be active to mint NFT");
         _;
+    }
+
+    /// @dev allow transfer
+    modifier whenAllowTransfer() {
+        require(allowTransfer, "transfer is not permitted");
+        _;
+    }
+
+    /// @dev update allowTransfer status
+    function updateAllowTransfer(bool status) public onlyOwner {
+        allowTransfer = status;
     }
 
     // @dev add token receivers
@@ -321,10 +338,8 @@ contract FanslandNFT is
             ERC721Upgradeable,
             ERC721EnumerableUpgradeable
         )
-        returns (
-            // whenNotPaused
-            address
-        )
+        whenNotPaused
+        returns (address)
     {
         // TODO: more check add here
         return super._update(to, tokenId, auth);
@@ -412,7 +427,7 @@ contract FanslandNFT is
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721Upgradeable, IERC721) whenNotPaused {
+    ) public override(ERC721Upgradeable, IERC721) whenAllowTransfer {
         super.transferFrom(from, to, tokenId);
     }
 
@@ -424,7 +439,7 @@ contract FanslandNFT is
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public override(ERC721Upgradeable, IERC721) whenNotPaused {
+    ) public override(ERC721Upgradeable, IERC721) whenAllowTransfer {
         super.safeTransferFrom(from, to, tokenId, data);
     }
 
