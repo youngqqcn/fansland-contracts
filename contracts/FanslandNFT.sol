@@ -295,7 +295,7 @@ contract FanslandNFT is
         tokenIdTypeMap[typeId] = typeId;
         nftTypeMap[typeId].totalSupply += quantity;
         require(
-            nftTypeMap[typeId].totalSupply < maxSupply,
+            nftTypeMap[typeId].totalSupply <= maxSupply,
             "tickets are not enough"
         );
         tokenIdCounter += quantity;
