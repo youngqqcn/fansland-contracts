@@ -287,18 +287,17 @@ contract FanslandNFT is
             uint256 curTokenId = tokenId + i;
             _mint(to, curTokenId);
 
-            // set nft type
             tokenIdTypeMap[curTokenId] = typeId;
 
-            // set nft type uri as tokenURI for this tokenId
             _setTokenURI(curTokenId, nftType.uri);
-
-            // emit MintNft event
-            // emit MintNft(address(0), to, curTokenId, typeId);
         }
 
         tokenIdTypeMap[typeId] = typeId;
         nftTypeMap[typeId].totalSupply += quantity;
+        require(
+            nftTypeMap[typeId].totalSupply < maxSupply,
+            "tickets are not enough"
+        );
         tokenIdCounter += quantity;
     }
 
