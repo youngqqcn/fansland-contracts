@@ -295,10 +295,18 @@ contract FanslandNFT is
         if (tokenReceiver == address(0)) {
             tokenReceiver = owner();
         }
-        require(
-            erc20Token.transferFrom(msg.sender, tokenReceiver, tokenAmount),
-            "transferFrom failed"
-        );
+
+        // ethereum mainnet USDT  https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
+        // transferFrom doesn't have return value:
+        //      function transferFrom(address from, address to, uint value) public;
+        if (payToken == address(0xdAC17F958D2ee523a2206206994597C13D831ec7)) {
+            erc20Token.transferFrom(msg.sender, tokenReceiver, tokenAmount);
+        } else {
+            require(
+                erc20Token.transferFrom(msg.sender, tokenReceiver, tokenAmount),
+                "transferFrom failed"
+            );
+        }
 
         for (uint i = 0; i < typeIds.length; i++) {
             _mintNFT(typeIds[i], _msgSender(), quantities[i]);

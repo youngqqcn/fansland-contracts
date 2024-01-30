@@ -3,6 +3,23 @@ require("@openzeppelin/hardhat-upgrades");
 require("@nomicfoundation/hardhat-verify");
 require("dotenv").config();
 
+/*
+562f81c9848e40b2b6040577a8eb9f41 // bsc_main
+e40cb1b6dad04c28878c1829c0dacc43 // eth_main
+447b40cf71644bd2884572bb28247d42 // arbitrum_main
+d7c30fd452f9473493d0cd9916621b6a // optimism_main
+ba926e04746f4f98a64265ee7ffb49bb // avalanche_main
+
+856bdab49c6143839f31a9eee036e93b // bsc_test
+83d3d7d77ee04a2e948a5fdb0f9dd98e // eth_test
+
+5a7b692fe4564472b5273c4e40bb5007
+6e0b025333a643068b094b7491676737
+db3b336580ee4d95a1de9971d584e515
+187964570e884d608f6b769a600186d2
+143a903db9054699a3c1fd99dff24255
+*/
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   defaultNetwork: "hardhat",
@@ -10,27 +27,72 @@ module.exports = {
     hardhat: {
       timeout: 600000,
     },
-    polygon: {
+    //========================mainnet=========================
+    polygon_main: {
       url: "https://polygon-mainnet.g.alchemy.com/v2/YClzyACPRcIQOYKhvWrWMj3sXaQcdXnP",
       chainId: 137,
-      accounts: [process.env.POLYGON_PRIVATE_KEY],
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
       //   gasPrice: 3_000_000_000,
     },
-    // bsc: {
-    // //   url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
-    // //   chainId: 97,
-    // //   accounts: [process.env.BNB_TESTNET_PRIVATE_KEY],
-    // },
-    mumbai: {
+    bsc_main: {
+      url: "https://bsc-mainnet.nodereal.io/v1/562f81c9848e40b2b6040577a8eb9f41",
+      chainId: 56,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+    },
+    eth_main: {
+      url: "https://eth-mainnet.nodereal.io/v1/e40cb1b6dad04c28878c1829c0dacc43",
+      chainId: 1,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+    },
+    arbitrum_main: {
+      // arbitrum-nova
+      url: "https://open-platform.nodereal.io/447b40cf71644bd2884572bb28247d42/arbitrum/",
+      chainId: 42170,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+    },
+    optimism_main: {
+      url: "https://opt-mainnet.nodereal.io/v1/d7c30fd452f9473493d0cd9916621b6a",
+      chainId: 10,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+    },
+    avalanche_main: {
+      // C-chain
+      url: "https://open-platform.nodereal.io/ba926e04746f4f98a64265ee7ffb49bb/avalanche-c/ext/bc/C/rpc",
+      chainId: 43114,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+    },
+    //========================testnet=========================
+    polygon_test: {
       url: "https://polygon-mumbai.g.alchemy.com/v2/NJsreaaTReGW3P0jzESHWw9TIeBKZ3Ly",
       chainId: 80001,
-      accounts: [process.env.MUMBAI_PRIVATE_KEY],
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
       gasPrice: 3_000_000_000,
     },
-    bsctest: {
-      url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
+    bsc_test: {
+      url: "https://bsc-testnet.nodereal.io/v1/83d3d7d77ee04a2e948a5fdb0f9dd98e",
       chainId: 97,
-      accounts: [process.env.BNB_TESTNET_PRIVATE_KEY],
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
+    },
+    eth_test: {
+      url: "https://eth-sepolia.nodereal.io/v1/4fd5911d00a14ff8a3c00c411b6af65d",
+      chainId: 11155111,
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
+    },
+    arbitrum_test: {
+      url: "https://arbitrum-sepolia.infura.io/v3/1cef30980e1949668742a5effed4ed49",
+      chainId: 421614,
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
+    },
+    optimism_test: {
+      // https://docs.optimism.io/chain/networks
+      url: "https://optimism-sepolia.infura.io/v3/91bda72598944012992059fe89da539c",
+      chainId: 11155420,
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
+    },
+    avalanche_test: {
+      url: "https://avalanche-fuji.infura.io/v3/99517aea5a9046e5bfb1d79e263595c7",
+      chainId: 43113,
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
     },
   },
   solidity: {
