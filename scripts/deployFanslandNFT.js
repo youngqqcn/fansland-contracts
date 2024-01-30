@@ -64,14 +64,12 @@ async function upgrade() {
     []
   );
   await token.waitForDeployment();
-
   console.log(`FanslandNFT contract: ${token.target}`);
 
-  // const r = await token.updatePaymentToken(
-  //   "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e",
-  //   true
-  // );
-  // console.log(r.hash);
+  let tx = await token.setFansPointContract(
+    "0x07399a07bD9C3B5f74F50C3654621F5DeE6EA07f"
+  );
+  console.log("tx:", tx);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
@@ -81,17 +79,17 @@ async function upgrade() {
 //   process.exitCode = 1;
 // });
 
-// upgrade().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-//   });
+upgrade().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 
 // fix().catch((error) => {
 //   console.error(error);
 //   process.exitCode = 1;
 // });
 
-deploy_usdt_and_nft().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// deploy_usdt_and_nft().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });

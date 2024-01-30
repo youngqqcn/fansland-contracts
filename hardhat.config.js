@@ -102,7 +102,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 100000,
+            runs: 200,
           },
         },
       },
@@ -115,8 +115,8 @@ module.exports = {
     apiKey: {
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
-      bscTestnet: process.env.POLYGONSCAN_API_KEY,
-      bsc: process.env.POLYGONSCAN_API_KEY,
+      bscTestnet: process.env.BSC_API_KEY,
+      bsc: process.env.BSC_API_KEY,
     },
   },
   sourcify: {

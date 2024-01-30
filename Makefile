@@ -24,12 +24,12 @@ clean:
 
 .PHONY: deploy-usdt
 deploy-usdt:
-	npx hardhat run --network mumbai scripts/deployUsdt.js
+	npx hardhat run --network polygon_test scripts/deployUsdt.js
 
 
 .PHONY: deploy-nft
 deploy-nft:
-	npx hardhat run --network mumbai scripts/deployFanslandNFT.js
+	npx hardhat run --network polygon_test scripts/deployFanslandNFT.js
 
 .PHONY: verify
 verify:

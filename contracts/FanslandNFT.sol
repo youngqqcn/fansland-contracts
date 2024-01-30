@@ -13,6 +13,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
+interface IFanslandPoint {
+    function reward(address to, uint256 value) external;
+
+    function decimals() external pure returns (uint8);
+
+    function fanslandNftContract() external pure returns (address);
+}
+
 contract FanslandNFT is
     Initializable,
     ERC721Upgradeable,
@@ -71,10 +79,28 @@ contract FanslandNFT is
     // transfer switch
     bool public allowTransfer;
 
+    //================== invite
+    IFanslandPoint public fansPointContract;
+    uint256 public userPointsRewardRate; // 0~1000 percentage, eg. 10 is 10%
+    mapping(address => uint256) public superKolRewardRates; // 0~1000 percentage
+    mapping(address => bool) public superKols;
+    uint256 public generalKolRewardRate; // 10% in default
+    address public root;
+    mapping(address => uint256) public kolInviteSuccessTimes; // the success invite times of a kol
+
+    event Invite(
+        address indexed user,
+        address indexed inviter,
+        uint256 indexed amount
+    );
+
+    //========================
+
+    // TODO: fix
     /// @custom:oz-upgrades-unsafe-allow constructor
-    // constructor() initializer {
-    //     _disableInitializers();
-    // }
+    constructor() {
+        _disableInitializers();
+    }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
@@ -121,7 +147,26 @@ contract FanslandNFT is
         // TODO:
         _tokenReceivers.push(owner());
         _tokenReceiversMap[owner()] = true;
+
+        userPointsRewardRate = 1000; // 1000%
+        generalKolRewardRate = 100; // 100%
+        root = address(1);
+
+        // super
+        superKols[root] = true;
+        superKolRewardRates[root] = 0;
     }
+
+    function init() public onlyOwner{
+        userPointsRewardRate = 1000; // 1000%
+        generalKolRewardRate = 100; // 100%
+        root = address(1);
+
+        // super
+        superKols[root] = true;
+        superKolRewardRates[root] = 0;
+    }
+
 
     /// @dev open sale
     modifier whenOpenSale() {
@@ -140,7 +185,24 @@ contract FanslandNFT is
         allowTransfer = status;
     }
 
-    // @dev add token receivers
+    /// @dev set point contract
+    function setFansPointContract(address point) public onlyOwner {
+        fansPointContract = IFanslandPoint(point);
+        require(fansPointContract.decimals() == 0, "invalid point contract");
+    }
+
+    /// @dev set kol's points rewards rate
+    function updateKolRewardsRates(address kol, uint256 rate) public onlyOwner {
+        superKolRewardRates[kol] = rate;
+        superKols[kol] = true;
+    }
+
+    /// @dev set user points rewards rate
+    function setUserPointsRewardRate(uint8 rate) public onlyOwner {
+        userPointsRewardRate = rate;
+    }
+
+    /// @dev add token receivers
     function addTokenReceivers(address[] calldata receivers) public onlyOwner {
         for (uint i = 0; i < receivers.length; i++) {
             address addr = receivers[i];
@@ -269,6 +331,18 @@ contract FanslandNFT is
         uint256[] calldata typeIds,
         uint256[] calldata quantities
     ) public whenOpenSale {
+        mintBatchByErc20(payToken, typeIds, quantities, root);
+    }
+
+    /// @dev mint NFT with ERC20 token paymentToken
+    // if openSale is true, it's mintable
+    // the kol default set 0x1
+    function mintBatchByErc20(
+        address payToken,
+        uint256[] calldata typeIds,
+        uint256[] calldata quantities,
+        address kol
+    ) public whenOpenSale {
         require(
             typeIds.length > 0 &&
                 quantities.length > 0 &&
@@ -280,15 +354,16 @@ contract FanslandNFT is
         IERC20Metadata erc20Token = IERC20Metadata(payToken);
         uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
 
+        address user = _msgSender();
         require(
-            erc20Token.allowance(msg.sender, address(this)) >= tokenAmount,
+            erc20Token.allowance(user, address(this)) >= tokenAmount,
             "allowance token is not enough"
         );
 
         // transfer ERC20 token
         address tokenReceiver = _tokenReceivers[
             (block.timestamp +
-                uint256(uint160(msg.sender)) +
+                uint256(uint160(user)) +
                 uint256(uint160(payToken)) +
                 tokenAmount) % _tokenReceivers.length
         ];
@@ -300,16 +375,59 @@ contract FanslandNFT is
         // transferFrom doesn't have return value:
         //      function transferFrom(address from, address to, uint value) public;
         if (payToken == address(0xdAC17F958D2ee523a2206206994597C13D831ec7)) {
-            erc20Token.transferFrom(msg.sender, tokenReceiver, tokenAmount);
+            erc20Token.transferFrom(user, tokenReceiver, tokenAmount);
         } else {
             require(
-                erc20Token.transferFrom(msg.sender, tokenReceiver, tokenAmount),
+                erc20Token.transferFrom(user, tokenReceiver, tokenAmount),
                 "transferFrom failed"
             );
         }
 
         for (uint i = 0; i < typeIds.length; i++) {
-            _mintNFT(typeIds[i], _msgSender(), quantities[i]);
+            _mintNFT(typeIds[i], user, quantities[i]);
+        }
+
+        // point rewards
+        if (
+            address(fansPointContract) != address(0) &&
+            kol != user &&
+            fansPointContract.fanslandNftContract() == address(this)
+        ) {
+            // 1. the kol is super KOL, such as public chain , exchange, media
+            // 2. the kol is the holder
+            if (superKols[kol] || balanceOf(kol) > 0) {
+                (bool ok, uint256 usdValue) = Math.tryDiv(
+                    tokenAmount,
+                    10 ** erc20Token.decimals()
+                );
+                if (!ok) {
+                    return;
+                }
+
+                // reward user
+                if (userPointsRewardRate > 0) {
+                    uint256 points = (usdValue * userPointsRewardRate) / 100;
+                    if (points > 0) {
+                        fansPointContract.reward(user, points);
+                    }
+                }
+
+                // reward kol
+                uint256 kolRate = superKolRewardRates[kol];
+                if (kolRate == 0 && !superKols[kol]) {
+                    // general kol rewards rate
+                    kolRate = generalKolRewardRate;
+                }
+                if (kolRate > 0) {
+                    uint256 points = (usdValue * kolRate) / 100;
+                    if (points > 0) {
+                        fansPointContract.reward(kol, points);
+                    }
+                }
+
+                // records
+                kolInviteSuccessTimes[kol] += 1;
+            }
         }
     }
 
