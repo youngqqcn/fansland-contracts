@@ -104,7 +104,7 @@ contract FanslandNFT is
             uri: "uri/0",
             maxSupply: 100,
             totalSupply: 0,
-            price: 0.0001 ether,
+            price: 1 ether,
             isSaleActive: true
         });
         nftTypeExistsMap[0] = true;
@@ -114,9 +114,9 @@ contract FanslandNFT is
             id: 1,
             name: "Fansland type 1",
             uri: "uri/1",
-            maxSupply: 10,
+            maxSupply: 100,
             totalSupply: 0,
-            price: 0.0003 ether,
+            price: 2 ether,
             isSaleActive: true
         });
         nftTypeExistsMap[1] = true;

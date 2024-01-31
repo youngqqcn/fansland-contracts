@@ -34,11 +34,48 @@ async function deploy() {
   );
   console.log("tx:", tx);
 
-//   const r = await token.updatePaymentToken(
-//     "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e",
-//     true
-//   );
-//   console.log(r.hash);
+  //   const r = await token.updatePaymentToken(
+  //     "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e",
+  //     true
+  //   );
+  //   console.log(r.hash);
+}
+
+async function deploy_ex() {
+  // 部署积分合约
+  const FanslandPoint = await hre.ethers.getContractFactory("FanslandPoint");
+  point = await hre.upgrades.deployProxy(FanslandPoint, []);
+  await point.waitForDeployment();
+  console.log(`FanslandPoint contract: ${point.target}`);
+
+  // 部署 NFT合约
+  const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
+  nft = await hre.upgrades.deployProxy(FanslandNFT, []);
+  await nft.waitForDeployment();
+  console.log(`FanslandNFT contract: ${nft.target}`);
+
+  // 设置NFT合约的积分合约
+  console.log("设置NFT合约的积分合约");
+  let tx = await nft.setFansPointContract(point.target);
+  console.log(tx.hash);
+
+  // 设置NFT合约的支付USDT合约
+  console.log("设置NFT合约的支付USDT合约");
+  const r = await nft.updatePaymentToken(
+    // "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e", // polygon_test
+    // "0x5e98CA9b49850650334AfE857D1d568Eb3edF1FA", // bsc_test
+    // "0xd972adf456a25673ade530c4b190db0ac1e5de75", // eth_test
+    // "0xd972adf456a25673ade530c4b190db0ac1e5de75", // optimism_test
+    // "0xd972adf456a25673ade530c4b190db0ac1e5de75", // arbitrum_test
+    "0xd972adf456a25673ade530c4b190db0ac1e5de75", // avalanche_test
+    true
+  );
+  console.log(r.hash);
+
+  // 设置积分合约的操作合约
+  console.log("设置积分合约的操作合约:");
+  const tx1 = await point.setFanslandNftContract(nft.target);
+  console.log(tx1.hash);
 }
 
 async function fix() {
@@ -53,12 +90,6 @@ async function fix() {
 
   console.log("owner()" + (await token.owner()));
 
-  // 设置USDT地址: https://polygonscan.com/token/0xc2132d05d31c914a87c6611c10748aeb04b58e8f
-  const r = await token.updatePaymentToken(
-    "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e",
-    true
-  );
-  console.log(r.hash);
 }
 
 async function upgrade() {
@@ -77,21 +108,17 @@ async function upgrade() {
   console.log("tx:", tx);
 }
 
-
-
-
-
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-// deploy().catch((error) => {
-//   console.error(error);
-//   process.exitCode = 1;
-// });
-fix().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  });
+deploy_ex().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 
+// fix().catch((error) => {
+//     console.error(error);
+//     process.exitCode = 1;
+//   });
 
 // upgrade().catch((error) => {
 //   console.error(error);
