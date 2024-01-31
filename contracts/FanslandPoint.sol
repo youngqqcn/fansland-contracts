@@ -65,12 +65,6 @@ contract FanslandPoint is
         superKolRewardRates[root] = 0;
     }
 
-    function getRewardRecords(
-        address addr,
-        uint page
-    ) public view returns (Record[] memory) {
-        return getRewardRecords(addr, page, 50);
-    }
 
     /// @dev get reward records by page, page start from 0
     function getRewardRecords(

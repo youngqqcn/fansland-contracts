@@ -276,16 +276,6 @@ contract FanslandNFT is
 
     /// @dev mint NFT with ERC20 token paymentToken
     // if openSale is true, it's mintable
-    function mintBatchByErc20(
-        address payToken,
-        uint256[] calldata typeIds,
-        uint256[] calldata quantities
-    ) public whenOpenSale {
-        mintBatchByErc20(payToken, typeIds, quantities, address(0x0));
-    }
-
-    /// @dev mint NFT with ERC20 token paymentToken
-    // if openSale is true, it's mintable
     // the kol default set 0x1
     function mintBatchByErc20(
         address payToken,
