@@ -26,9 +26,30 @@ async function main() {
   console.log(await token.owner());
 }
 
+async function upgrade_fansland_point() {
+  const FanslandPoint = await hre.ethers.getContractFactory("FanslandPoint");
+  token = await hre.upgrades.upgradeProxy(
+    "0xf011c95cbeda9075a1034ee391dd26c32c060faa",
+    FanslandPoint,
+    []
+  );
+  await token.waitForDeployment();
+  console.log(`FanslandPoint contract: ${token.target}`);
+
+  // let tx = await token.setFansPointContract(
+  //   "0xF011c95cBeDa9075a1034ee391dd26C32c060Faa"
+  // );
+  // console.log("tx:", tx);
+}
+
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main().catch((error) => {
+// main().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
+
+upgrade_fansland_point().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

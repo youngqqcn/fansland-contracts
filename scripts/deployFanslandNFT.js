@@ -29,18 +29,23 @@ async function deploy() {
 
   console.log(`FanslandNFT contract: ${token.target}`);
 
-  const r = await token.updatePaymentToken(
-    "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e",
-    true
+  let tx = await token.setFansPointContract(
+    "0xF011c95cBeDa9075a1034ee391dd26C32c060Faa"
   );
-  console.log(r.hash);
+  console.log("tx:", tx);
+
+//   const r = await token.updatePaymentToken(
+//     "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e",
+//     true
+//   );
+//   console.log(r.hash);
 }
 
 async function fix() {
   // const FanslandNFT =
   let token = await hre.ethers.getContractAt(
     "FanslandNFT",
-    "0x8251D9B3a30c5c96391C5bCF7f531C227BEfDe2d"
+    "0x43ba61db70c10EDD3b5C7cf405cFe5847D66f753"
   );
   // await token.waitForDeployment();
 
@@ -50,7 +55,7 @@ async function fix() {
 
   // 设置USDT地址: https://polygonscan.com/token/0xc2132d05d31c914a87c6611c10748aeb04b58e8f
   const r = await token.updatePaymentToken(
-    "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+    "0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e",
     true
   );
   console.log(r.hash);
@@ -67,10 +72,14 @@ async function upgrade() {
   console.log(`FanslandNFT contract: ${token.target}`);
 
   let tx = await token.setFansPointContract(
-    "0x07399a07bD9C3B5f74F50C3654621F5DeE6EA07f"
+    "0xF011c95cBeDa9075a1034ee391dd26C32c060Faa"
   );
   console.log("tx:", tx);
 }
+
+
+
+
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
@@ -78,11 +87,16 @@ async function upgrade() {
 //   console.error(error);
 //   process.exitCode = 1;
 // });
+fix().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
 
-upgrade().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+
+// upgrade().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
 
 // fix().catch((error) => {
 //   console.error(error);
