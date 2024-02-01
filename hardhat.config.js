@@ -78,18 +78,18 @@ module.exports = {
       chainId: 11155111,
       accounts: [process.env.TESTNET_PRIVATE_KEY],
     },
-    arbitrum_test: {
+    arb_test: {
       url: "https://arbitrum-sepolia.infura.io/v3/1cef30980e1949668742a5effed4ed49",
       chainId: 421614,
       accounts: [process.env.TESTNET_PRIVATE_KEY],
     },
-    optimism_test: {
+    opt_test: {
       // https://docs.optimism.io/chain/networks
       url: "https://optimism-sepolia.infura.io/v3/91bda72598944012992059fe89da539c",
       chainId: 11155420,
       accounts: [process.env.TESTNET_PRIVATE_KEY],
     },
-    avalanche_test: {
+    avax_test: {
       url: "https://avalanche-fuji.infura.io/v3/99517aea5a9046e5bfb1d79e263595c7",
       chainId: 43113,
       accounts: [process.env.TESTNET_PRIVATE_KEY],

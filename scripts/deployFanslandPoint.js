@@ -48,10 +48,10 @@ async function set_kol() {
     "FanslandPoint",
     // "0xc5FFbD7D153e8aEf47245E72182DcAa138081bE2" // polygon_test
     // "0x67D008e6C9f77c9D9830435E080384FC68FB2924" // bsc_test
-    // "0xde5cB2d8FE351A8003A30702d52fb231b1cDFc6d" // eth_test
-    // "0xde5cB2d8FE351A8003A30702d52fb231b1cDFc6d" // op_test
-    // "0xde5cB2d8FE351A8003A30702d52fb231b1cDFc6d" // arb_test
-    "0x67D008e6C9f77c9D9830435E080384FC68FB2924" // avax_test
+    "0xde5cB2d8FE351A8003A30702d52fb231b1cDFc6d" // eth_test
+    // "0xde5cB2d8FE351A8003A30702d52fb231b1cDFc6d" // optimism_test
+    // "0xde5cB2d8FE351A8003A30702d52fb231b1cDFc6d" // arbitrum_test
+    // "0x67D008e6C9f77c9D9830435E080384FC68FB2924" // avax_test
   );
 
   console.log(`FanslandNFT contract: ${token.target}`);
@@ -59,21 +59,22 @@ async function set_kol() {
 
   // 设置USDT地址: https://polygonscan.com/token/0xc2132d05d31c914a87c6611c10748aeb04b58e8f
   const r = await token.updateKolRewardsRates(
-    "0x0000000000000000000000000000000000000001",
-    100 // 10%
+    // "0x0000000000000000000000000000000000000001",
+    "0x875C60A2bA16E738A4F4a0175Fcdc0335fc68728",
+    200 // 10%
   );
   console.log(r.hash);
 
-  const r2 = await token.updateKolRewardsRates(
-    "0x0000000000000000000000000000000000000002",
-    200 // 20%
-  );
-  console.log(r2.hash);
-  const r3 = await token.updateKolRewardsRates(
-    "0x0000000000000000000000000000000000000003",
-    300 // 30%
-  );
-  console.log(r3.hash);
+//   const r2 = await token.updateKolRewardsRates(
+//     "0x0000000000000000000000000000000000000002",
+//     200 // 20%
+//   );
+//   console.log(r2.hash);
+//   const r3 = await token.updateKolRewardsRates(
+//     "0x0000000000000000000000000000000000000003",
+//     300 // 30%
+//   );
+//   console.log(r3.hash);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

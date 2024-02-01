@@ -82,14 +82,28 @@ async function fix() {
   // const FanslandNFT =
   let token = await hre.ethers.getContractAt(
     "FanslandNFT",
-    "0x43ba61db70c10EDD3b5C7cf405cFe5847D66f753"
+    // "0xBd207F330CD3fEd7fE7F84D8a69311067e5F293d" // polygon-test
+    // "0x97Dc353eB0bc9885850630939E99e4A896b43F75" // bsc-test
+    // "0x4E360cF41d53e65c424c9A62f44A7B50eB8e9bC5" // eth-test
+    // "0x4E360cF41d53e65c424c9A62f44A7B50eB8e9bC5" // opt-test
+    // "0x4E360cF41d53e65c424c9A62f44A7B50eB8e9bC5" // arb-test
+    "0x97Dc353eB0bc9885850630939E99e4A896b43F75" // avax-test
   );
   // await token.waitForDeployment();
 
   console.log(`FanslandNFT contract: ${token.target}`);
-
   console.log("owner()" + (await token.owner()));
 
+  const r = await token.updatePaymentToken(
+    // "0xBF424B16D70942Ee910fB44Db41afEd705F623eb", // polygon-test
+    // "0x84A723E865f823D66Efdcd797C6a39fb422921B8", // bsc-test
+    // "0x51716F5783Ac7D2E6943232f8691DBA16EdeE186", // eth-test
+    // "0x7068E856D7b496E2dABEF79de07B6bBd41d2b556", // opt-test
+    // "0x63564E7525985879e7C48B35BF0Be310A9Ba9867", // arb-test
+    "0xf3B835E8F58E0a46A4683Fa5CB82CddCC0d5841D", // avax-test
+    true
+  );
+  console.log(r.hash);
 }
 
 async function upgrade() {
@@ -110,15 +124,15 @@ async function upgrade() {
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-deploy_ex().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// deploy_ex().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
 
-// fix().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-//   });
+fix().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
 
 // upgrade().catch((error) => {
 //   console.error(error);
