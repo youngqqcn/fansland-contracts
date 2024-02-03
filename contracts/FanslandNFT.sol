@@ -31,7 +31,6 @@ contract FanslandNFT is
     // Contract private variables
     uint256 public tokenIdCounter;
     bool public openSale; // open sale
-    uint256 public maxSupply;
     string public baseURI;
 
     struct NftType {
@@ -95,7 +94,6 @@ contract FanslandNFT is
 
         openSale = true;
         baseURI = "https://mynft.com/";
-        maxSupply = 100000;
 
         // TODO: init with some data
         nftTypeMap[0] = NftType({
@@ -362,7 +360,7 @@ contract FanslandNFT is
         tokenIdTypeMap[typeId] = typeId;
         nftTypeMap[typeId].totalSupply += quantity;
         require(
-            nftTypeMap[typeId].totalSupply <= maxSupply,
+            nftTypeMap[typeId].totalSupply <= nftTypeMap[typeId].maxSupply,
             "tickets are not enough"
         );
         tokenIdCounter += quantity;
