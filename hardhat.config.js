@@ -85,6 +85,7 @@ module.exports = {
     },
     opt_test: {
       // https://docs.optimism.io/chain/networks
+    //   https://optimism-sepolia.infura.io/v3/4ff797bd44304499b0628ce2f6879132   #华宇,备用
       url: "https://optimism-sepolia.infura.io/v3/91bda72598944012992059fe89da539c",
       chainId: 11155420,
       accounts: [process.env.TESTNET_PRIVATE_KEY],
