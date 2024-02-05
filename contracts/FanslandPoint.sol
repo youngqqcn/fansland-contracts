@@ -104,29 +104,29 @@ contract FanslandPoint is
     ) public onlyFanslandNftContract {
         // 1. the kol is super KOL, such as public chain , exchange, media
         // 2. the kol is the holder
-        if (superKols[kol] || balanceOf(kol) > 0) {
-            // reward user
-            uint256 userPoints = 0;
-            uint256 kolPoints = 0;
-            if (userPointsRewardRate > 0) {
-                userPoints = (usdValue_x10 * userPointsRewardRate) / (100 * 10);
-            }
-
-            // reward kol
-            uint256 kolRate = superKolRewardRates[kol];
-            if (kolRate == 0 && !superKols[kol]) {
-                // general kol rewards rate
-                kolRate = generalKolRewardRate;
-            }
-            if (kolRate > 0) {
-                kolPoints = (usdValue_x10 * kolRate) / (100 * 10);
-            }
-
-            _reward(user, userPoints, kol, kolPoints);
-
-            // records
-            kolInviteSuccessTimes[kol] += 1;
+        // if (superKols[kol] || balanceOf(kol) > 0) {
+        // reward user
+        uint256 userPoints = 0;
+        uint256 kolPoints = 0;
+        if (userPointsRewardRate > 0) {
+            userPoints = (usdValue_x10 * userPointsRewardRate) / (100 * 10);
         }
+
+        // reward kol
+        uint256 kolRate = superKolRewardRates[kol];
+        if (kolRate == 0 && !superKols[kol]) {
+            // general kol rewards rate
+            kolRate = generalKolRewardRate;
+        }
+        if (kolRate > 0) {
+            kolPoints = (usdValue_x10 * kolRate) / (100 * 10);
+        }
+
+        _reward(user, userPoints, kol, kolPoints);
+
+        // records
+        kolInviteSuccessTimes[kol] += 1;
+    // }
     }
 
     ///@dev dispatch mint reward
