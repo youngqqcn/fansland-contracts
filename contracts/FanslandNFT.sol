@@ -98,13 +98,14 @@ contract FanslandNFT is
         baseURI = "https://mynft.com/";
 
         // TODO: init with some data
-        addNftType(1, "Fansland type 1", "uri/1", 10, 0, 0.1 ether, true);
-        addNftType(2, "Fansland type 2", "uri/2", 50, 0, 1 ether, true);
-        addNftType(3, "Fansland type 3", "uri/3", 100, 0, 10 ether, true);
-        addNftType(4, "Fansland type 4", "uri/4", 200, 0, 100 ether, true);
-        addNftType(5, "Fansland type 5", "uri/5", 100, 0, 1000 ether, true);
-        addNftType(6, "Fansland type 6", "uri/6", 10, 0, 1000000 ether, true);
-        addNftType(7, "Fansland type 7", "uri/7", 1, 0, 10000000 ether, false);
+        addNftType(0, "Fansland type 0", "uri/0", 100, 0, 0.1 ether, true);
+        addNftType(1, "Fansland type 1", "uri/1", 100, 0, 1 ether, true);
+        // addNftType(2, "Fansland type 2", "uri/2", 50, 0, 1 ether, true);
+        // addNftType(3, "Fansland type 3", "uri/3", 100, 0, 10 ether, true);
+        // addNftType(4, "Fansland type 4", "uri/4", 200, 0, 100 ether, true);
+        // addNftType(5, "Fansland type 5", "uri/5", 100, 0, 1000 ether, true);
+        // addNftType(6, "Fansland type 6", "uri/6", 10, 0, 1000000 ether, true);
+        // addNftType(7, "Fansland type 7", "uri/7", 1, 0, 10000000 ether, false);
 
         // TODO:
         _tokenReceivers.push(owner());

@@ -32,12 +32,13 @@ module.exports = {
       url: "https://polygon-mainnet.g.alchemy.com/v2/YClzyACPRcIQOYKhvWrWMj3sXaQcdXnP",
       chainId: 137,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
-      //   gasPrice: 3_000_000_000,
+      gasPrice: 110_000_000_000,
     },
     bsc_main: {
       url: "https://bsc-mainnet.nodereal.io/v1/562f81c9848e40b2b6040577a8eb9f41",
       chainId: 56,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
+      gasPrice: 3_000_000_000,
     },
     eth_main: {
       url: "https://eth-mainnet.nodereal.io/v1/e40cb1b6dad04c28878c1829c0dacc43",
