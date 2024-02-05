@@ -55,7 +55,9 @@ contract FanslandPoint is
     function initialize() public initializer {
         __ERC20_init("FanslandPoint", "FPT");
         __Ownable_init(msg.sender);
+    }
 
+    function init() public onlyOwner {
         userPointsRewardRate = 1000; // 1000%
         generalKolRewardRate = 100; // 100%
         root = address(0);
@@ -64,7 +66,6 @@ contract FanslandPoint is
         superKols[root] = true;
         superKolRewardRates[root] = 0;
     }
-
 
     /// @dev get reward records by page, page start from 0
     function getRewardRecords(
@@ -97,7 +98,7 @@ contract FanslandPoint is
 
     ///@dev point rewards
     function rewardPoints(
-        uint256 usdValue,
+        uint256 usdValue_x10,
         address user,
         address kol
     ) public onlyFanslandNftContract {
@@ -108,7 +109,7 @@ contract FanslandPoint is
             uint256 userPoints = 0;
             uint256 kolPoints = 0;
             if (userPointsRewardRate > 0) {
-                userPoints = (usdValue * userPointsRewardRate) / 100;
+                userPoints = (usdValue_x10 * userPointsRewardRate) / (100 * 10);
             }
 
             // reward kol
@@ -118,7 +119,7 @@ contract FanslandPoint is
                 kolRate = generalKolRewardRate;
             }
             if (kolRate > 0) {
-                kolPoints = (usdValue * kolRate) / 100;
+                kolPoints = (usdValue_x10 * kolRate) / (100 * 10);
             }
 
             _reward(user, userPoints, kol, kolPoints);
@@ -156,10 +157,20 @@ contract FanslandPoint is
         }
     }
 
-    /// @dev set kol's points rewards rate
-    function updateKolRewardsRates(address kol, uint256 rate) public onlyOwner {
-        superKolRewardRates[kol] = rate;
-        superKols[kol] = true;
+    /// @dev  set kol points rewards rates
+    function setKolsRewardsRates(
+        address[] memory kols,
+        uint256[] memory rates
+    ) public onlyOwner {
+        require(
+            kols.length > 0 && kols.length == rates.length,
+            "invalid params"
+        );
+
+        for (uint i = 0; i < kols.length; i++) {
+            superKolRewardRates[kols[i]] = rates[i];
+            superKols[kols[i]] = true;
+        }
     }
 
     /// @dev set user points rewards rate

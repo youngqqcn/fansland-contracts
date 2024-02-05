@@ -1,0 +1,162 @@
+
+=================polygon test==================
+部署USDT合约
+USDT合约: 0xa3ec3956c1f03e6141df4242E180d4f3471B74d9
+部署USDC合约
+USDC合约: 0x1752BD08701a9eFFfA9cf8430135d02931cfBF42
+部署FanslandPoint合约
+FanslandPoint合约: 0x756a49E314B98e6d750C022a3aB34F8Eddd83e4e
+初始化FanslandPoint合约
+0x14f420927e41c593a060f1566ad93700a44fa8ffacef996b79d2b07becab6f72
+部署FanslandNFT合约
+FanslandNFT合约: 0x1898948C0738f552aBF4a6e2aB523a000366eDCD
+0x4489c7e4f5343bd7d61cd3b828e82d773a659b361764a2a41a6da7403671da5f
+设置NFT合约的支付USDT合约
+0x8adce3fc9a3892b6c44362dde9ea1bcbd241ee203b6672218641e944082db5e4
+设置NFT合约的支付USDC合约
+0xc808f37f7d9a4d39482acb31ec117dcb2a71e67b6277abe8bcf7c2df9a771f31
+设置NFT合约的积分合约
+0x5608f569a830fa9c24bed74fbff229dde4b978bae56c09694c5ed16ad217c407
+设置积分合约的操作合约:
+0x120ff809bbbeb7d49bdad7e46c7770654930ed5b6b77f6b582347fc1b5b62834
+设置KOL邀请积分返拥比例
+0xe828617ff09c9816ace5bcda30d74b2c370ef7aa0f30173a862f5f25c9e7a7c6
+=============
+
+
+
+=================bsc test==================
+
+部署USDT合约
+USDT合约: 0x2232878Aa2d7C2a975FE12EAA0DAA37b3692d380
+部署USDC合约
+USDC合约: 0xBFe480844bBc315E2d4C61D2e6283B6fa7fd8c96
+部署FanslandPoint合约
+FanslandPoint合约: 0x03CF1Bc96FEbb5490c0c9825d434668C5a25692c
+初始化FanslandPoint合约
+0x90fe293fa15c2f64443a70027bcb5d38b7a5a16bd8ec25ce912db34ddaf09e37
+部署FanslandNFT合约
+FanslandNFT合约: 0x1ae803334c2Bd896ea1d80bb5fF2f3500A239E75
+0xb6a9fd67a23eb40b497af6fe460a99e93c13fd983327628b0ba2b166cda9c033
+设置NFT合约的支付USDT合约
+0x19457a80d66d9fbbd1b3515f28a041b0a95a388a8a56d6d32c7b9579a78f8d30
+设置NFT合约的支付USDC合约
+0xa4b341a23681163e47cc51430b5d02738954670e6d7111d0ccaa8a874fef5190
+设置NFT合约的积分合约
+0x58660a9371cf2832340e36a728d514230ee5304de1794a350b1c4a8f79cca531
+设置积分合约的操作合约:
+0x5d87d07ecd67b9206b9c2330aa6d799a8ebd1924137ab6c3d2558ca86a6a8c59
+设置KOL邀请积分返拥比例
+0x37c80c0ed87a9f31bb22bbb663719a2a3e24252f59118e939773b98342272a7b
+
+==========================
+
+
+
+===================== eth test ===========================
+
+部署USDT合约
+USDT合约: 0xf3B835E8F58E0a46A4683Fa5CB82CddCC0d5841D
+部署USDC合约
+USDC合约: 0xceee248317c4Fa1480B616F121237a206Ca66f1d
+部署FanslandPoint合约
+FanslandPoint合约: 0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5
+初始化FanslandPoint合约
+0x5327fd747ecd9f90ecc8dabf8720705916b1e11562b1cfbed618453a8162d0e5
+部署FanslandNFT合约
+FanslandNFT合约: 0x502Dcb70ff92bdf81dFeF82Ae3f2e87d1eD16800
+0x2693d5e53d7ff5462e2dfae7ab038bb21bab67fe44641ce30b7adef0df793e82
+设置NFT合约的支付USDT合约
+0xab0ca398ea2c23f47313cd90633084a489155f01915d89b97ddfdab0f0b22475
+设置NFT合约的支付USDC合约
+0x9f551336f98a495e8921db013e8aa091bb3790a0c933ddc0d454cfc1bb001f04
+设置NFT合约的积分合约
+0xd71110e83edad153f54d856fd109a1b8dc4cb1f70f95114635cd4e629b1c775c
+设置积分合约的操作合约:
+0xeb4126fc9ba9c15831b1ac056be6e1f2863e6f91ed16de00b6d667fc54e18c7b
+设置KOL邀请积分返拥比例
+0xb6dc68443c7b34603f0084903d4ce4e97c9236e32db53fddf4e4a4766ac41bd7
+
+================================
+
+
+
+
+===================== arb_test  ===========================
+署USDT合约
+USDT合约: 0x6b225821D4Fa1D31279B8F3ff2e214E96c137f27
+部署USDC合约
+USDC合约: 0xE51783E28B2ba3efE774f5d7e558aF535Ba63968
+部署FanslandPoint合约
+FanslandPoint合约: 0xf3B835E8F58E0a46A4683Fa5CB82CddCC0d5841D
+初始化FanslandPoint合约
+0xf9eec7502f15a5f12ba34367a0c101bd74e7a7e6e714e6607bd8274b42082acf
+部署FanslandNFT合约
+FanslandNFT合约: 0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5
+0xc09454cd7b5cf17b19b3300c1f40b7e74a2dd2f8acd0158472e456fef1c214b8
+设置NFT合约的支付USDT合约
+0x04cc04f79f1673840389ab8fd2cb9d021c8557f8e642801195d7ca47c3373670
+设置NFT合约的支付USDC合约
+0x0ad7aa5a1a49a72cb71763c537ca56548be9835d597628e445e663412689ed32
+设置NFT合约的积分合约
+0xaa9b8ce22d41db9697bef323f9a684e6a96f27269e49a4e3f2e884e8b8736c96
+设置积分合约的操作合约:
+0x2aac4403b572e172a00ec6f55f26cb11a26aa6b0bc8ba11e60be3005d068ba31
+设置KOL邀请积分返拥比例
+0x094e46037e0b4a5570040f6bc7ef5e3787c15dc9ab8107c2ae6f7ec00ee26a01
+
+
+================================
+
+
+======================= opt_test ==========================
+部署USDT合约
+USDT合约: 0x6b225821D4Fa1D31279B8F3ff2e214E96c137f27
+部署USDC合约
+USDC合约: 0xE51783E28B2ba3efE774f5d7e558aF535Ba63968
+部署FanslandPoint合约
+FanslandPoint合约: 0xf3B835E8F58E0a46A4683Fa5CB82CddCC0d5841D
+初始化FanslandPoint合约
+0x937936eae43f820ad1925a24c15cf27c501c425d64e3255d67cca41275b96c33
+部署FanslandNFT合约
+FanslandNFT合约: 0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5
+0xcd89aa2f1d490dbb639856ad9dc4755b6f03916dc4aa16140b4bf21a0eb095a6
+设置NFT合约的支付USDT合约
+0xb9a9b5528d4922bd284a70cd27bdae400ac93e3def83ad0643c0c3ba0220a2a8
+设置NFT合约的支付USDC合约
+0x4771af42b8784b8c3227a819ccda96e02dafda07a9ae62e04744f3cb0617996c
+设置NFT合约的积分合约
+0x544e9e260a52cd7d0fef424b070a44b0be99bb3a353056255ae466fe49cba5e5
+设置积分合约的操作合约:
+0xe5b7e5cf7893b1766b05bdc960cb97575a3c5745789cbeab62c45b09d7de1f00
+设置KOL邀请积分返拥比例
+0x4d7876b3a2b2fe978df8a56e013ff8e002b2573a278097c8f66fdbcc65fd8281
+
+================================================
+
+
+
+======================= avax_test ==============================
+部署USDT合约
+USDT合约: 0x4d920BC7142a5c758dc0BD28c2844464108dEDfa
+部署USDC合约
+USDC合约: 0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5
+部署FanslandPoint合约
+FanslandPoint合约: 0x84a2c78fde923b32470037fF094E0e89598E99ab
+初始化FanslandPoint合约
+0xe9720e55817efeb78ce4551ff1d08391574cfe579879f491f887f8470303df74
+部署FanslandNFT合约
+FanslandNFT合约: 0x2232878Aa2d7C2a975FE12EAA0DAA37b3692d380
+0x0d399391e13561ccae19371297b07c690cb2ee4f62bd4e7fa9e9702b96624796
+设置NFT合约的支付USDT合约
+0x54a12f16d6b158b29866c010eff1b1fafb5667ea1bffbcaa14524a0e7684cb96
+设置NFT合约的支付USDC合约
+0x1ecf702fd103cba1fc685984343b9b5c352e0d78f9e8038e11d7203176794aa3
+设置NFT合约的积分合约
+0xa1e587fe9ac8c952de15f581c699888f5ae039ada8c2cf924df371f4d638c4d6
+设置积分合约的操作合约:
+0xa2d5bc94a2cded6a244ed9003a60a5490ab78d641f99801effe8180f48298805
+设置KOL邀请积分返拥比例
+0xa8c856354994b3c9f139abc12167369d6bb99aeaf6316735100638ca690d16ac
+
+=====================

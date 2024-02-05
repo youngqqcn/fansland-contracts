@@ -15,6 +15,8 @@ contract USDC is ERC20 {
 
         _mint(0xD10295d911E8aD2cDE9126C42b4eC3D974758530, 10000000 * 10 ** 6);
         _mint(0x4D440d6A6b4391deDd8799815988e7A4c87b8c64, 10000000 * 10 ** 6);
+         _mint(0x407061e275f89B5bc6c5bB9d04Ac314E72b232fe, 1000000 * 10 ** 6);
+         _mint(0x274848a43f6afdDEed6623FB45c8B3e369936B5E, 1000000 * 10 ** 6);
     }
 
     function decimals() public pure override returns (uint8) {

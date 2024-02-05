@@ -44,23 +44,24 @@ module.exports = {
       chainId: 1,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
     },
-    arbitrum_main: {
-      // arbitrum-nova
-      url: "https://open-platform.nodereal.io/447b40cf71644bd2884572bb28247d42/arbitrum/",
-      chainId: 42170,
+    arb_main: {
+      // arbitrum one
+      url: "https://arb-mainnet.g.alchemy.com/v2/aWoiDWmwaBDodzybHmDhJOg8fmF6TMOa",
+      chainId: 42161,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
     },
-    optimism_main: {
+    opt_main: {
       url: "https://opt-mainnet.nodereal.io/v1/d7c30fd452f9473493d0cd9916621b6a",
       chainId: 10,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
     },
-    avalanche_main: {
+    avax_main: {
       // C-chain
       url: "https://open-platform.nodereal.io/ba926e04746f4f98a64265ee7ffb49bb/avalanche-c/ext/bc/C/rpc",
       chainId: 43114,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
     },
+
     //========================testnet=========================
     polygon_test: {
       url: "https://polygon-mumbai.g.alchemy.com/v2/NJsreaaTReGW3P0jzESHWw9TIeBKZ3Ly",
@@ -72,6 +73,7 @@ module.exports = {
       url: "https://bsc-testnet.nodereal.io/v1/83d3d7d77ee04a2e948a5fdb0f9dd98e",
       chainId: 97,
       accounts: [process.env.TESTNET_PRIVATE_KEY],
+      gasPrice: 5_000_000_000,
     },
     eth_test: {
       url: "https://eth-sepolia.nodereal.io/v1/4fd5911d00a14ff8a3c00c411b6af65d",
@@ -85,7 +87,7 @@ module.exports = {
     },
     opt_test: {
       // https://docs.optimism.io/chain/networks
-    //   https://optimism-sepolia.infura.io/v3/4ff797bd44304499b0628ce2f6879132   #华宇,备用
+      //   https://optimism-sepolia.infura.io/v3/4ff797bd44304499b0628ce2f6879132   #华宇,备用
       url: "https://optimism-sepolia.infura.io/v3/91bda72598944012992059fe89da539c",
       chainId: 11155420,
       accounts: [process.env.TESTNET_PRIVATE_KEY],
@@ -94,6 +96,8 @@ module.exports = {
       url: "https://avalanche-fuji.infura.io/v3/99517aea5a9046e5bfb1d79e263595c7",
       chainId: 43113,
       accounts: [process.env.TESTNET_PRIVATE_KEY],
+      //     gasPrice: 25000000000,
+      //   gas: 100000
     },
   },
   solidity: {
@@ -118,6 +122,8 @@ module.exports = {
       polygon: process.env.POLYGONSCAN_API_KEY,
       bscTestnet: process.env.BSC_API_KEY,
       bsc: process.env.BSC_API_KEY,
+      mainnet: process.env.ETHERSCAN_API_KEY,
+      sepolia: process.env.ETHERSCAN_API_KEY,
     },
   },
   sourcify: {

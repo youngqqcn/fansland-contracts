@@ -33,4 +33,5 @@ deploy-nft:
 
 .PHONY: verify
 verify:
-	npx hardhat verify --network mumbai 0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e
+	npx hardhat verify --network polygon_test 0x2D2c6A2c2559229A99cD348934f1852f3Fd23C1e
+	npx hardhat verify --contract contracts/USDC.sol:USDC --network bsc_test 0x1752BD08701a9eFFfA9cf8430135d02931cfBF4

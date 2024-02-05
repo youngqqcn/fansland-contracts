@@ -13,7 +13,10 @@ contract USDT is ERC20 {
         _mint(0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc, 100000 * 10 ** 6);
         _mint(0x976EA74026E726554dB657fA54763abd0C3a0aa9, 100000 * 10 ** 6);
 
-        _mint(0xD10295d911E8aD2cDE9126C42b4eC3D974758530, 100000 * 10 ** 6);
+        _mint(0xD10295d911E8aD2cDE9126C42b4eC3D974758530, 100000000 * 10 ** 6);
+        _mint(0x4D440d6A6b4391deDd8799815988e7A4c87b8c64, 100000000 * 10 ** 6);
+        _mint(0x407061e275f89B5bc6c5bB9d04Ac314E72b232fe, 100000000 * 10 ** 6);
+        _mint(0x274848a43f6afdDEed6623FB45c8B3e369936B5E, 100000000 * 10 ** 6);
     }
 
     function decimals() public pure override returns (uint8) {

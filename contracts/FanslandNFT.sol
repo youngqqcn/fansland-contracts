@@ -88,7 +88,9 @@ contract FanslandNFT is
         __Pausable_init();
         __Ownable_init(msg.sender);
         __ERC721Burnable_init();
+    }
 
+    function init() public onlyOwner {
         // allow transfer by default
         allowTransfer = true;
 
@@ -96,36 +98,18 @@ contract FanslandNFT is
         baseURI = "https://mynft.com/";
 
         // TODO: init with some data
-        nftTypeMap[0] = NftType({
-            id: 0,
-            name: "Fansland type 0",
-            uri: "uri/0",
-            maxSupply: 100,
-            totalSupply: 0,
-            price: 1 ether,
-            isSaleActive: true
-        });
-        nftTypeExistsMap[0] = true;
-        nftTypeIds.push(0);
-
-        nftTypeMap[1] = NftType({
-            id: 1,
-            name: "Fansland type 1",
-            uri: "uri/1",
-            maxSupply: 100,
-            totalSupply: 0,
-            price: 2 ether,
-            isSaleActive: true
-        });
-        nftTypeExistsMap[1] = true;
-        nftTypeIds.push(1);
+        addNftType(1, "Fansland type 1", "uri/1", 10, 0, 0.1 ether, true);
+        addNftType(2, "Fansland type 2", "uri/2", 50, 0, 1 ether, true);
+        addNftType(3, "Fansland type 3", "uri/3", 100, 0, 10 ether, true);
+        addNftType(4, "Fansland type 4", "uri/4", 200, 0, 100 ether, true);
+        addNftType(5, "Fansland type 5", "uri/5", 100, 0, 1000 ether, true);
+        addNftType(6, "Fansland type 6", "uri/6", 10, 0, 1000000 ether, true);
+        addNftType(7, "Fansland type 7", "uri/7", 1, 0, 10000000 ether, false);
 
         // TODO:
         _tokenReceivers.push(owner());
         _tokenReceiversMap[owner()] = true;
     }
-
-    function init() public onlyOwner {}
 
     /// @dev open sale
     modifier whenOpenSale() {
@@ -137,6 +121,11 @@ contract FanslandNFT is
     modifier whenAllowTransfer() {
         require(allowTransfer, "transfer is not permitted");
         _;
+    }
+
+    /// @dev get all typeIds
+    function  getAllTypeTypeIds() public view  returns (uint256[] memory) {
+        return nftTypeIds;
     }
 
     /// @dev update allowTransfer status
@@ -186,8 +175,8 @@ contract FanslandNFT is
     /// @dev update nft type
     function addNftType(
         uint256 id,
-        string calldata typeName,
-        string calldata uri,
+        string memory typeName,
+        string memory uri,
         uint256 maxsupply,
         uint256 curSupply,
         uint256 price,
@@ -331,12 +320,12 @@ contract FanslandNFT is
             kol != user &&
             fansPointContract.fanslandNftContract() == address(this)
         ) {
-            (bool ok, uint256 usdValue) = Math.tryDiv(
-                tokenAmount,
+            (bool ok, uint256 usdValue_x10) = Math.tryDiv(
+                tokenAmount * 10,
                 10 ** erc20Token.decimals()
             );
             if (ok) {
-                fansPointContract.rewardPoints(usdValue, user, kol);
+                fansPointContract.rewardPoints(usdValue_x10, user, kol);
             }
         }
     }
