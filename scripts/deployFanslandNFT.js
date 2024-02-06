@@ -122,27 +122,57 @@ async function addNftType() {
   console.log(`FanslandNFT contract: ${token.target}`);
   console.log("owner()" + (await token.owner()));
 
-//   let nftType = await token.nftTypeMap(0);
+  //   let nftType = await token.nftTypeMap(0);
 
-//   const r = await token.addNftType(0, "Fansland Type 0", "uri/0", 100, 0, "1000000000000000000", true);
-  const r = await token.addNftType(1, "Fansland Type 1", "uri/1", 100, 0, "100000000000000000", true);
+  //   const r = await token.addNftType(0, "Fansland Type 0", "uri/0", 100, 0, "1000000000000000000", true);
+  const r = await token.addNftType(
+    1,
+    "Fansland Type 1",
+    "uri/1",
+    100,
+    0,
+    "100000000000000000",
+    true
+  );
   console.log(r.hash);
 }
 
 async function upgrade() {
-  const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
-  token = await hre.upgrades.upgradeProxy(
-    // "0x1898948C0738f552aBF4a6e2aB523a000366eDCD",
-    // "0x1ae803334c2Bd896ea1d80bb5fF2f3500A239E75",
-    // "0x502Dcb70ff92bdf81dFeF82Ae3f2e87d1eD16800",
-    // "0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5",
-    // "0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5",
-    // "0x2232878Aa2d7C2a975FE12EAA0DAA37b3692d380",
-    FanslandNFT,
-    []
+  //   const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
+  //   token = await hre.upgrades.upgradeProxy(
+  //     // "0x1898948C0738f552aBF4a6e2aB523a000366eDCD",
+  //     // "0x1ae803334c2Bd896ea1d80bb5fF2f3500A239E75",
+  //     // "0x502Dcb70ff92bdf81dFeF82Ae3f2e87d1eD16800",
+  //     // "0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5",
+  //     // "0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5",
+  //     // "0x2232878Aa2d7C2a975FE12EAA0DAA37b3692d380",
+  //     "0x124b8aD4bFD840794A37DeB968c4495787413456",
+  //     FanslandNFT,
+  //     []
+  //   );
+  //   await token.waitForDeployment();
+  //   console.log(`FanslandNFT contract: ${token.target}`);
+  let token = await hre.ethers.getContractAt(
+    "FanslandNFT",
+    // "0x1898948C0738f552aBF4a6e2aB523a000366eDCD" // polygon_test
+    // "0x1ae803334c2Bd896ea1d80bb5fF2f3500A239E75" // bsc_test
+    // "0x502Dcb70ff92bdf81dFeF82Ae3f2e87d1eD16800" // eth_test
+    // "0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5" // opt_test
+    // "0xcBA5E94b5d96E3716149Ae3E2eB3Fc4005fb21F5" // arb_test
+    "0x124b8aD4bFD840794A37DeB968c4495787413456" // ava_test
   );
-  await token.waitForDeployment();
-  console.log(`FanslandNFT contract: ${token.target}`);
+
+  //   let r = await token.updatePaymentToken(
+  //     "0x9449bDee0B7e7fC9b7af8be4E5cC1e8080A9e444",
+  //     true
+  //   );
+  //   console.log("tx ", r.hash);
+
+  let t = await token.setEthereumUsdt(
+    "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    true
+  );
+  console.log("tx ", t.hash);
 
   //   const r = await token.addNftType(
   //     0,
@@ -174,15 +204,15 @@ async function upgrade() {
 //     process.exitCode = 1;
 //   });
 
-addNftType().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
-
-// upgrade().catch((error) => {
+// addNftType().catch((error) => {
 //   console.error(error);
 //   process.exitCode = 1;
 // });
+
+upgrade().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 
 // fix().catch((error) => {
 //   console.error(error);

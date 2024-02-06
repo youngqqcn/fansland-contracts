@@ -15,6 +15,18 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "./IFanslandPoint.sol";
 
+// https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
+interface IEthereumUsdtAdapter {
+    function decimals() external view returns (uint);
+
+    function transferFrom(address _from, address _to, uint _value) external;
+
+    function allowance(
+        address owner,
+        address spender
+    ) external view returns (uint);
+}
+
 contract FanslandNFT is
     Initializable,
     ERC721Upgradeable,
@@ -74,6 +86,8 @@ contract FanslandNFT is
 
     IFanslandPoint public fansPointContract; // point rewards
 
+    mapping(address => bool) public isEthereumUsdt;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -110,6 +124,9 @@ contract FanslandNFT is
         // TODO:
         _tokenReceivers.push(owner());
         _tokenReceiversMap[owner()] = true;
+        isEthereumUsdt[
+            address(0xdAC17F958D2ee523a2206206994597C13D831ec7)
+        ] = true;
     }
 
     /// @dev open sale
@@ -124,8 +141,13 @@ contract FanslandNFT is
         _;
     }
 
+    /// @dev set ethereum usdt
+    function setEthereumUsdt(address usdt, bool ok) public onlyOwner {
+        isEthereumUsdt[usdt] = ok;
+    }
+
     /// @dev get all typeIds
-    function  getAllTypeTypeIds() public view  returns (uint256[] memory) {
+    function getAllTypeTypeIds() public view returns (uint256[] memory) {
         return nftTypeIds;
     }
 
@@ -222,6 +244,12 @@ contract FanslandNFT is
     ) public view returns (uint256) {
         require(typeIds.length == quantities.length, "args length not match");
         require(tokenIsAllowed(payToken), "payment token not support");
+        uint256 decimals = 0;
+        if (isEthereumUsdt[payToken]) {
+            decimals = IEthereumUsdtAdapter(payToken).decimals();
+        } else {
+            decimals = IERC20Metadata(payToken).decimals();
+        }
 
         // get the total price of all NFT
         uint256 totalPrice = 0;
@@ -253,10 +281,7 @@ contract FanslandNFT is
         // convert decimals
         bool okDiv = false;
         uint256 tokenAmount = 0;
-        (okDiv, tokenAmount) = Math.tryDiv(
-            totalPrice,
-            10 ** (18 - IERC20Metadata(payToken).decimals())
-        );
+        (okDiv, tokenAmount) = Math.tryDiv(totalPrice, 10 ** (18 - decimals));
         require(okDiv, "div overflow");
 
         return tokenAmount;
@@ -278,16 +303,9 @@ contract FanslandNFT is
             "args length not match"
         );
         require(tokenIsAllowed(payToken), "payment token not support");
-
-        IERC20Metadata erc20Token = IERC20Metadata(payToken);
-        uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
-
+        uint256 decimals = 0;
         address user = _msgSender();
-        require(
-            erc20Token.allowance(user, address(this)) >= tokenAmount,
-            "allowance token is not enough"
-        );
-
+        uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
         // transfer ERC20 token
         address tokenReceiver = _tokenReceivers[
             (block.timestamp +
@@ -299,12 +317,21 @@ contract FanslandNFT is
             tokenReceiver = owner();
         }
 
-        // ethereum mainnet USDT  https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
-        // transferFrom doesn't have return value:
-        //      function transferFrom(address from, address to, uint value) public;
-        if (payToken == address(0xdAC17F958D2ee523a2206206994597C13D831ec7)) {
-            erc20Token.transferFrom(user, tokenReceiver, tokenAmount);
+        if (isEthereumUsdt[payToken]) {
+            IEthereumUsdtAdapter usdt = IEthereumUsdtAdapter(payToken);
+            decimals = usdt.decimals();
+            require(
+                usdt.allowance(user, address(this)) >= tokenAmount,
+                "allowance token is not enough"
+            );
+            usdt.transferFrom(user, tokenReceiver, tokenAmount);
         } else {
+            IERC20Metadata erc20Token = IERC20Metadata(payToken);
+            decimals = erc20Token.decimals();
+            require(
+                erc20Token.allowance(user, address(this)) >= tokenAmount,
+                "allowance token is not enough"
+            );
             require(
                 erc20Token.transferFrom(user, tokenReceiver, tokenAmount),
                 "transferFrom failed"
@@ -323,7 +350,7 @@ contract FanslandNFT is
         ) {
             (bool ok, uint256 usdValue_x10) = Math.tryDiv(
                 tokenAmount * 10,
-                10 ** erc20Token.decimals()
+                10 ** decimals
             );
             if (ok) {
                 fansPointContract.rewardPoints(usdValue_x10, user, kol);

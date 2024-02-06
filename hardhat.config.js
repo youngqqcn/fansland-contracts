@@ -44,6 +44,7 @@ module.exports = {
       url: "https://eth-mainnet.nodereal.io/v1/e40cb1b6dad04c28878c1829c0dacc43",
       chainId: 1,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
+      gasPrice: 25_000_000_000,
     },
     arb_main: {
       // arbitrum one
@@ -105,6 +106,15 @@ module.exports = {
     compilers: [
       {
         version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      {
+        version: "0.4.18",
         settings: {
           optimizer: {
             enabled: true,
