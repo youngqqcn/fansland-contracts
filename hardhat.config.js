@@ -63,6 +63,30 @@ module.exports = {
       chainId: 43114,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
     },
+    polygon_zkevm_main: {
+    //   url: "https://polygonzkevm-mainnet.g.alchemy.com/v2/zC1XV6Bb4scVQc34WhVwtopZWKbymGBG",
+    // url: "https://go.getblock.io/4d2f611f6b814c66b60b116fa38f34e6",
+      url: "https://zkevm-rpc.com",
+      chainId: 1101,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+      gasPrice: 3_100_000_000
+    },
+    opbnb_main: {
+      url: "https://opbnb-mainnet.nodereal.io/v1/86611fa959544efb9337d30c0dc7ab27",
+      chainId: 204,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+    //   gasPrice: 90_000
+    },
+    base_main: {
+      url: "https://base-mainnet.g.alchemy.com/v2/aAavxCh6gbB_lzEu3tDaS6k0q5czHNix",
+      chainId: 8453,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+    },
+    linea_main: {
+      url: "https://linea-mainnet.infura.io/v3/8a264f274fd94de48eb290d35db030ab",
+      chainId: 59144,
+      accounts: [process.env.MAINNET_PRIVATE_KEY],
+    },
 
     //========================testnet=========================
     polygon_test: {
@@ -101,6 +125,26 @@ module.exports = {
       //     gasPrice: 25000000000,
       //   gas: 100000
     },
+    polygon_zkevm_test: {
+      url: "https://polygonzkevm-testnet.g.alchemy.com/v2/cDJCTLtzwiKcHybmIx-U9LAhDYmJIoje",
+      chainId: 1442,
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
+    },
+    opbnb_test: {
+      url: "https://opbnb-testnet.nodereal.io/v1/86611fa959544efb9337d30c0dc7ab27",
+      chainId: 5611,
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
+    },
+    base_test: {
+      url: "https://base-sepolia.g.alchemy.com/v2/1n5T4FGRTheVgLXfv5bDwtAyhxqKEP4f",
+      chainId: 84532,
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
+    },
+    linea_test: {
+      url: "https://linea-goerli.infura.io/v3/8a264f274fd94de48eb290d35db030ab",
+      chainId: 59140,
+      accounts: [process.env.TESTNET_PRIVATE_KEY],
+    },
   },
   solidity: {
     compilers: [
@@ -131,11 +175,62 @@ module.exports = {
     apiKey: {
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
+      polygonZkEVMTestnet: process.env.POLYGON_ZKEVM_SCAN_API_KEY,
+      polygonZkEVM: process.env.POLYGON_ZKEVM_SCAN_API_KEY,
       bscTestnet: process.env.BSC_API_KEY,
       bsc: process.env.BSC_API_KEY,
+      opbnb_main: process.env.OPBNB_API_KEY,
+      opbnb_test: process.env.OPBNB_API_KEY,
       mainnet: process.env.ETHERSCAN_API_KEY,
       sepolia: process.env.ETHERSCAN_API_KEY,
+      base: process.env.BASE_API_KEY,
+      base_test: process.env.BASE_API_KEY,
+      linea_test: process.env.LINEA_API_KEY,
+      linea_main: process.env.LINEA_API_KEY,
     },
+    customChains: [
+        // https://docs.bscscan.com/v/opbnb/getting-started/endpoint-urls
+      {
+        network: "opbnb_test",
+        chainId: 5611,
+        urls: {
+          apiURL: "https://api-opbnb-testnet.bscscan.com/api",
+          browserURL: "https://opbnb-testnet.bscscan.com",
+        },
+      },
+      {
+        network: "opbnb_main",
+        chainId: 204,
+        urls: {
+          apiURL: "https://api-opbnb.bscscan.com/api",
+          browserURL: "https://opbnb.bscscan.com",
+        },
+      },
+      {
+        network: "base_test",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://api-sepolia.basescan.org/api",
+          browserURL: "https://sepolia.basescan.org",
+        },
+      },
+      {
+        network: "linea_test",
+        chainId: 59140,
+        urls: {
+          apiURL: "https://api-goerli.lineascan.build/api",
+          browserURL: "https://goerli.lineascan.build",
+        },
+      },
+      {
+        network: "linea_main",
+        chainId: 59144,
+        urls: {
+          apiURL: "https://api.lineascan.build/api",
+          browserURL: "https://lineascan.build",
+        },
+      },
+    ],
   },
   sourcify: {
     enabled: false,

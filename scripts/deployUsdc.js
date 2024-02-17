@@ -12,7 +12,7 @@ async function main() {
 
 //   const lockedAmount = hre.ethers.parseEther("0.001");
 
-  const usdc = await hre.ethers.deployContract("USDC");
+  const usdc = await hre.ethers.deployContract("USDC", { gasLimit: "0x1000000" });
   await usdc.waitForDeployment();
 
   console.log(`USDC contract: ${usdc.target}`);
