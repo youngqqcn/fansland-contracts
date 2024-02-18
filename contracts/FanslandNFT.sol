@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -29,9 +28,7 @@ interface IEthereumUsdtAdapter {
 
 contract FanslandNFT is
     Initializable,
-    ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
-    ERC721URIStorageUpgradeable,
     ERC721PausableUpgradeable,
     OwnableUpgradeable,
     ERC721BurnableUpgradeable,
@@ -98,7 +95,6 @@ contract FanslandNFT is
     function initialize() public initializer {
         __ERC721_init("Fansland", "Fansland");
         __ERC721Enumerable_init();
-        __ERC721URIStorage_init();
         __Pausable_init();
         __Ownable_init(msg.sender);
         __ERC721Burnable_init();
@@ -370,8 +366,6 @@ contract FanslandNFT is
             _mint(to, curTokenId);
 
             tokenIdTypeMap[curTokenId] = typeId;
-
-            _setTokenURI(curTokenId, nftType.uri);
         }
 
         tokenIdTypeMap[typeId] = typeId;
@@ -510,12 +504,7 @@ contract FanslandNFT is
 
     function tokenURI(
         uint256 tokenId
-    )
-        public
-        view
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
-        returns (string memory)
-    {
+    ) public view override(ERC721Upgradeable) returns (string memory) {
         if (tokenId > tokenIdCounter) {
             revert ERC721NonexistentToken(tokenId);
         }
@@ -529,11 +518,7 @@ contract FanslandNFT is
     )
         public
         view
-        override(
-            ERC721EnumerableUpgradeable,
-            ERC721URIStorageUpgradeable,
-            ERC721Upgradeable
-        )
+        override(ERC721EnumerableUpgradeable, ERC721Upgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
