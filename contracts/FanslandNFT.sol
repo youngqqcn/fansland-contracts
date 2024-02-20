@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "./IFanslandPoint.sol";
 
-import "./IOldUsdtAdapter.sol";
+import "./IERC20Usdt.sol";
 
 
 contract FanslandNFT is
@@ -233,7 +233,7 @@ contract FanslandNFT is
         require(tokenIsAllowed(payToken), "payment token not support");
         uint256 decimals = 0;
         if (isEthereumUsdt[payToken]) {
-            decimals = IOldUsdtAdapter(payToken).decimals();
+            decimals = IERC20Usdt(payToken).decimals();
         } else {
             decimals = IERC20Metadata(payToken).decimals();
         }
@@ -305,7 +305,7 @@ contract FanslandNFT is
         }
 
         if (isEthereumUsdt[payToken]) {
-            IOldUsdtAdapter usdt = IOldUsdtAdapter(payToken);
+            IERC20Usdt usdt = IERC20Usdt(payToken);
             decimals = usdt.decimals();
             require(
                 usdt.allowance(user, address(this)) >= tokenAmount,
