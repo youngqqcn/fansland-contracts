@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -17,57 +16,46 @@ import "./IERC20Usdt.sol";
 contract FanslandNFT is
     Initializable,
     ERC721EnumerableUpgradeable,
-    ERC721PausableUpgradeable,
     OwnableUpgradeable,
     UUPSUpgradeable
 {
-    uint256 public tokenIdCounter;
-    bool public openSale; // open sale
-    string public baseURI;
-
     struct NftType {
-        uint256 id; // ticket type id
-        string name; // type name
-        string uri; // uri
-        uint256 maxSupply; // maxsupply
-        uint256 totalSupply; // totalSupply
-        uint256 price; // price
-        bool isSaleActive; // sale staus
+        uint256 id;
+        string name;
+        string uri;
+        uint256 maxSupply;
+        uint256 totalSupply;
+        uint256 price;
+        bool isSaleActive;
     }
+
+    uint256 public tokenIdCounter;
+    bool public openSale;
+    string public baseURI;
+    bool public allowTransfer;
 
     mapping(uint256 => NftType) public nftTypeMap;
     mapping(uint256 => bool) public nftTypeExistsMap;
     uint256[] public nftTypeIds;
     mapping(uint256 => uint256) public tokenIdTypeMap;
 
-    // payment tokens
     mapping(address => bool) _paymentTokensMap;
     address[] public paymentTokens;
 
-    // token receivers
     address[] _tokenReceivers;
     mapping(address => bool) _tokenReceiversMap;
 
-    /**
-     * @dev Emitted when the base URI is changed.
-     */
-    event UriChanged();
+    // https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
+    address private ethErc20Usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 
-    /// @dev Emitted typeId to record
+    IFanslandPoint public fansPointContract;
+
     event MintNft(
         address indexed from,
         address indexed to,
         uint256 indexed tokenId,
         uint256 typeId
     );
-
-    // transfer switch
-    bool public allowTransfer;
-
-    IFanslandPoint public fansPointContract; // point rewards
-
-    // https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
-    address private ethErc20Usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -79,87 +67,103 @@ contract FanslandNFT is
     function initialize() public initializer {
         __ERC721_init("Fansland", "Fansland");
         __ERC721Enumerable_init();
-        __Pausable_init();
         __Ownable_init(msg.sender);
     }
 
     function init() public onlyOwner {
-        // allow transfer by default
         allowTransfer = true;
 
         openSale = true;
         baseURI = "ipfs://bafybeif6qumbfl6y75o2gortc4w4f2m5ksjmvypa5zwlgcxec5l4x2r3ya/";
 
-        addNftType(0, "Fansland type 0", "0", 100, 0, 0.1 ether, true);
-        addNftType(1, "Fansland type 1", "1", 100, 0, 1 ether, true);
+        updateNftType(0, "Fansland type 0", "0", 100, 0, 0.1 ether, true);
+        updateNftType(1, "Fansland type 1", "1", 100, 0, 1 ether, true);
 
         _tokenReceivers.push(owner());
         _tokenReceiversMap[owner()] = true;
     }
 
-    /// @dev open sale
     modifier whenOpenSale() {
         require(openSale, "Sale must be active to mint NFT");
         _;
     }
 
-    /// @dev allow transfer
     modifier whenAllowTransfer() {
         require(allowTransfer, "transfer is not permitted");
         _;
     }
 
-    /// @dev get all typeIds
     function getAllTypeTypeIds() public view returns (uint256[] memory) {
         return nftTypeIds;
     }
 
-    /// @dev update allowTransfer status
     function updateAllowTransfer(bool status) public onlyOwner {
         allowTransfer = status;
     }
 
-    /// @dev set point contract
     function setFansPointContract(address point) public onlyOwner {
         fansPointContract = IFanslandPoint(point);
         require(fansPointContract.decimals() == 0, "invalid point contract");
     }
 
-    /// @dev add token receivers
-    function addTokenReceivers(address[] calldata receivers) public onlyOwner {
+    function updateTokenReceivers(
+        address[] calldata receivers,
+        bool[] calldata bools
+    ) public onlyOwner {
+        require(receivers.length == bools.length, "invalid arguments");
         for (uint i = 0; i < receivers.length; i++) {
             address addr = receivers[i];
-            if (!_tokenReceiversMap[addr]) {
-                _tokenReceivers.push(addr);
-                _tokenReceiversMap[addr] = true;
+            if (bools[i]) {
+                if (!_tokenReceiversMap[addr]) {
+                    _tokenReceivers.push(addr);
+                }
+            } else {
+                // remove
+                for (uint j = 0; j < _tokenReceivers.length; j++) {
+                    if (_tokenReceivers[j] == addr) {
+                        _tokenReceivers[j] = _tokenReceivers[
+                            _tokenReceivers.length - 1
+                        ];
+                        _tokenReceivers.pop();
+                        break;
+                    }
+                }
             }
+            _tokenReceiversMap[addr] = bools[i];
         }
     }
 
-    /// @dev add allowed tokens
-    function updatePaymentToken(address token, bool active) public onlyOwner {
-        _paymentTokensMap[token] = active;
-        if (active) {
-            paymentTokens.push(token);
-        } else {
-            // remove token
-            for (uint i = 0; i < paymentTokens.length; i++) {
-                if (paymentTokens[i] == token) {
-                    paymentTokens[i] = paymentTokens[paymentTokens.length - 1];
-                    paymentTokens.pop();
-                    break;
+    function updatePaymentToken(
+        address[] calldata tokens,
+        bool[] calldata actives
+    ) public onlyOwner {
+        require(tokens.length == actives.length, "invalid arguments");
+        for (uint n = 0; n < tokens.length; n++) {
+            address token = tokens[n];
+            bool active = actives[n];
+            _paymentTokensMap[token] = active;
+            if (active) {
+                paymentTokens.push(token);
+            } else {
+                // remove token
+                for (uint i = 0; i < paymentTokens.length; i++) {
+                    if (paymentTokens[i] == token) {
+                        paymentTokens[i] = paymentTokens[
+                            paymentTokens.length - 1
+                        ];
+                        paymentTokens.pop();
+                        break;
+                    }
                 }
             }
         }
     }
 
-    /// @dev check if token is allowed
     function tokenIsAllowed(address token) public view returns (bool) {
         return _paymentTokensMap[token];
     }
 
-    /// @dev update nft type
-    function addNftType(
+    function updateNftType(
         uint256 id,
         string memory typeName,
         string memory uri,
@@ -184,7 +188,6 @@ contract FanslandNFT is
         }
     }
 
-    /// @dev delete nft type
     function removeNftType(uint256 id) public onlyOwner {
         delete nftTypeMap[id];
         nftTypeExistsMap[id] = false;
@@ -199,12 +202,10 @@ contract FanslandNFT is
         }
     }
 
-    /// @dev check is eth erc20 usdt
     function _isEthErc20Usdt(address payToken) internal view returns (bool) {
         return address(payToken) == address(ethErc20Usdt);
     }
 
-    /// @dev aggregate all price and quantity
     function calculateTotal(
         address payToken,
         uint256[] calldata typeIds,
@@ -255,7 +256,6 @@ contract FanslandNFT is
         return tokenAmount;
     }
 
-    /// @dev mint NFT with ERC20 token paymentToken
     function mintBatchByErc20(
         address payToken,
         uint256[] calldata typeIds,
@@ -324,7 +324,6 @@ contract FanslandNFT is
         }
     }
 
-    /// @dev  batch mint
     function _mintNFT(uint256 typeId, address to, uint256 quantity) internal {
         require(nftTypeExistsMap[typeId], "invalid typeId");
 
@@ -350,7 +349,7 @@ contract FanslandNFT is
     function _increaseBalance(
         address account,
         uint128 value
-    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
+    ) internal override(ERC721EnumerableUpgradeable) {
         super._increaseBalance(account, value);
     }
 
@@ -359,12 +358,7 @@ contract FanslandNFT is
         address to,
         uint256 tokenId,
         address auth
-    )
-        internal
-        override(ERC721PausableUpgradeable, ERC721EnumerableUpgradeable)
-        whenNotPaused
-        returns (address)
-    {
+    ) internal override(ERC721EnumerableUpgradeable) returns (address) {
         return super._update(to, tokenId, auth);
     }
 
@@ -387,9 +381,8 @@ contract FanslandNFT is
             uint256 resultIndex = 0;
 
             // We count on the fact that all cats have IDs starting at 1 and increasing
-            // sequentially up to the totalCat count.
-            uint256 index;
-            for (index = 0; index < tokenCount; index++) {
+            // sequentially up to the total count.
+            for (uint256 index = 0; index < tokenCount; index++) {
                 result[resultIndex] = tokenOfOwnerByIndex(_owner, index);
                 resultIndex++;
             }
@@ -403,15 +396,6 @@ contract FanslandNFT is
 
     function setBaseURI(string memory newBaseTokenURI) public onlyOwner {
         baseURI = newBaseTokenURI;
-        emit UriChanged();
-    }
-
-    function pause() public onlyOwner {
-        _pause();
-    }
-
-    function unpause() public onlyOwner {
-        _unpause();
     }
 
     function transferFrom(
@@ -422,9 +406,6 @@ contract FanslandNFT is
         super.transferFrom(from, to, tokenId);
     }
 
-    /**
-     * @dev See {ERC721Upgradeable-safeTransferFrom}.
-     */
     function safeTransferFrom(
         address from,
         address to,
@@ -446,16 +427,10 @@ contract FanslandNFT is
 
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        override(ERC721EnumerableUpgradeable, ERC721Upgradeable)
-        returns (bool)
-    {
+    ) public view override(ERC721EnumerableUpgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
-    ///@dev fallback
     receive() external payable {
         if (msg.value > 0) {
             revert("do not send eth to this contract directly");
