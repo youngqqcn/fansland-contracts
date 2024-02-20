@@ -347,8 +347,6 @@ contract FanslandNFT is
         tokenIdCounter += quantity;
     }
 
-    /// @param account account
-    /// @param value value
     function _increaseBalance(
         address account,
         uint128 value
@@ -399,55 +397,23 @@ contract FanslandNFT is
         }
     }
 
-    /// @dev allows owner to withdraw ethers
-    // function withdraw() public onlyOwner {
-    //     uint balance = address(this).balance;
-    //     payable(owner()).transfer(balance);
-    // }
-
-    /// @param isOpenSale Sale status param.
-    /// @dev This method should be invoked from WEB3 for setting sale active status
     function setSaleActive(bool isOpenSale) public onlyOwner {
         openSale = isOpenSale;
     }
 
-    /// @param newBaseTokenURI New base token URI.
-    /// @dev This method should be invoked from WEB3 for setting base token URI
     function setBaseURI(string memory newBaseTokenURI) public onlyOwner {
         baseURI = newBaseTokenURI;
         emit UriChanged();
     }
 
-    /// @dev This method should be invoked from WEB3 from owner's account to PAUSE the smart contract
-    ///
-    /// disallow NFT transfer
     function pause() public onlyOwner {
         _pause();
     }
 
-    /// @dev This method should be invoked from WEB3 from owner's account to UNPAUSE the smart contract
-    ///
-    /// allow NFT transfer
     function unpause() public onlyOwner {
         _unpause();
     }
 
-    /**
-     * @dev Transfers `tokenId` token from `from` to `to`.
-     *
-     * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721
-     * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must
-     * understand this adds an external call which potentially creates a reentrancy vulnerability.
-     *
-     * Requirements:
-     *
-     * - `from` cannot be the zero address.
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must be owned by `from`.
-     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.
-     *
-     * Emits a {Transfer} event.
-     */
     function transferFrom(
         address from,
         address to,
@@ -487,10 +453,6 @@ contract FanslandNFT is
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
-    }
-
-    function _baseURI() internal view virtual override returns (string memory) {
-        return baseURI;
     }
 
     ///@dev fallback
