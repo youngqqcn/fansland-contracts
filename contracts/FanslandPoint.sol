@@ -67,7 +67,6 @@ contract FanslandPoint is
         superKolRewardRates[root] = 0;
     }
 
-    /// @dev get reward records by page, page start from 0
     function getRewardRecords(
         address addr,
         uint page,
@@ -89,23 +88,17 @@ contract FanslandPoint is
         return result;
     }
 
-    /// @dev return the length
     function getAddressRewardRecordsLength(
         address addr
     ) public view returns (uint256) {
         return recordsIndexs[addr].length;
     }
 
-    ///@dev point rewards
     function rewardPoints(
         uint256 usdValue_x10,
         address user,
         address kol
     ) public onlyFanslandNftContract {
-        // 1. the kol is super KOL, such as public chain , exchange, media
-        // 2. the kol is the holder
-        // if (superKols[kol] || balanceOf(kol) > 0) {
-        // reward user
         uint256 userPoints = 0;
         uint256 kolPoints = 0;
         if (userPointsRewardRate > 0) {
@@ -126,10 +119,8 @@ contract FanslandPoint is
 
         // records
         kolInviteSuccessTimes[kol] += 1;
-    // }
     }
 
-    ///@dev dispatch mint reward
     function _reward(
         address user,
         uint256 userValue,
@@ -157,7 +148,6 @@ contract FanslandPoint is
         }
     }
 
-    /// @dev  set kol points rewards rates
     function setKolsRewardsRates(
         address[] memory kols,
         uint256[] memory rates
@@ -173,7 +163,6 @@ contract FanslandPoint is
         }
     }
 
-    /// @dev set user points rewards rate
     function setUserPointsRewardRate(uint8 rate) public onlyOwner {
         userPointsRewardRate = rate;
     }
@@ -190,7 +179,6 @@ contract FanslandPoint is
         return 0;
     }
 
-    // airdrop
     function airdrop(
         address[] memory addrs,
         uint256[] memory values
