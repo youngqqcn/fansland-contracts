@@ -267,7 +267,7 @@ contract FanslandNFT is
         address tokenReceiver = owner();
         if (_tokenReceivers.length > 0) {
             tokenReceiver = _tokenReceivers[
-                (tokenAmount + uint256(uint160(user))) % _tokenReceivers.length
+                (tokenAmount + uint256(uint160(user)) + tokenIdCounter) % _tokenReceivers.length
             ];
         }
 
