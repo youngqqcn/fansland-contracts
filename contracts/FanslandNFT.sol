@@ -9,8 +9,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import "./IFanslandPoint.sol";
-
 import "./IERC20Usdt.sol";
 
 contract FanslandNFT is
@@ -20,7 +18,7 @@ contract FanslandNFT is
     UUPSUpgradeable
 {
     struct NftType {
-        uint256 id;
+        uint8 id;
         string name;
         string uri;
         uint256 maxSupply;
@@ -48,13 +46,11 @@ contract FanslandNFT is
     // https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
     address private ethErc20Usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 
-    IFanslandPoint public fansPointContract;
-
     event MintNft(
-        address indexed from,
-        address indexed to,
-        uint256 indexed tokenId,
-        uint256 typeId
+        address indexed user,
+        address indexed kol,
+        uint256 totalUsd,
+        uint256 timestamp
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -78,9 +74,6 @@ contract FanslandNFT is
 
         updateNftType(0, "Fansland type 0", "0", 100, 0, 0.1 ether, true);
         updateNftType(1, "Fansland type 1", "1", 100, 0, 1 ether, true);
-
-        _tokenReceivers.push(owner());
-        _tokenReceiversMap[owner()] = true;
     }
 
     modifier whenOpenSale() {
@@ -101,11 +94,6 @@ contract FanslandNFT is
         allowTransfer = status;
     }
 
-    function setFansPointContract(address point) public onlyOwner {
-        fansPointContract = IFanslandPoint(point);
-        require(fansPointContract.decimals() == 0, "invalid point contract");
-    }
-
     function updateTokenReceivers(
         address[] calldata receivers,
         bool[] calldata bools
@@ -113,6 +101,7 @@ contract FanslandNFT is
         require(receivers.length == bools.length, "invalid arguments");
         for (uint i = 0; i < receivers.length; i++) {
             address addr = receivers[i];
+            require(uint160(addr) > 0xFFFFFFFF, "invalid receive address");
             if (bools[i]) {
                 if (!_tokenReceiversMap[addr]) {
                     _tokenReceivers.push(addr);
@@ -164,7 +153,7 @@ contract FanslandNFT is
     }
 
     function updateNftType(
-        uint256 id,
+        uint8 id,
         string memory typeName,
         string memory uri,
         uint256 maxsupply,
@@ -256,7 +245,7 @@ contract FanslandNFT is
         return tokenAmount;
     }
 
-    function mintBatchByErc20(
+    function mintBatch(
         address payToken,
         uint256[] calldata typeIds,
         uint256[] calldata quantities,
@@ -272,16 +261,14 @@ contract FanslandNFT is
         uint256 decimals = 0;
         address user = _msgSender();
         uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
-        // transfer ERC20 token
-        address tokenReceiver = _tokenReceivers[
-            (block.timestamp +
-                uint256(uint160(user)) +
-                uint256(uint160(payToken)) +
-                tokenAmount) % _tokenReceivers.length
-        ];
-        if (tokenReceiver == address(0)) {
-            tokenReceiver = owner();
+
+        address tokenReceiver = owner();
+        if (_tokenReceivers.length > 0) {
+            tokenReceiver = _tokenReceivers[
+                block.timestamp % _tokenReceivers.length
+            ];
         }
+        require(uint160(tokenReceiver) > 0xFFFFFFFF, "invalid receive address");
 
         if (_isEthErc20Usdt(payToken)) {
             IERC20Usdt usdt = IERC20Usdt(payToken);
@@ -309,18 +296,9 @@ contract FanslandNFT is
         }
 
         // point rewards
-        if (
-            address(fansPointContract) != address(0) &&
-            kol != user &&
-            fansPointContract.fanslandNftContract() == address(this)
-        ) {
-            (bool ok, uint256 usdValue_x10) = Math.tryDiv(
-                tokenAmount * 10,
-                10 ** decimals
-            );
-            if (ok) {
-                fansPointContract.rewardPoints(usdValue_x10, user, kol);
-            }
+        (bool ok, uint256 usdPrice) = Math.tryDiv(tokenAmount, 10 ** decimals);
+        if (ok) {
+            emit MintNft(user, kol, usdPrice, block.timestamp);
         }
     }
 
