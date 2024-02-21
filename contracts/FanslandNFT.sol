@@ -267,10 +267,9 @@ contract FanslandNFT is
         address tokenReceiver = owner();
         if (_tokenReceivers.length > 0) {
             tokenReceiver = _tokenReceivers[
-                (block.timestamp + uint256(uint160(user))) % _tokenReceivers.length
+                (tokenAmount + uint256(uint160(user))) % _tokenReceivers.length
             ];
         }
-        require(uint160(tokenReceiver) > 0xFFFFFFFF, "invalid receive address");
 
         if (_isEthErc20Usdt(payToken)) {
             IERC20Usdt usdt = IERC20Usdt(payToken);
