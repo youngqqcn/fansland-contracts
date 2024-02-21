@@ -44,12 +44,12 @@ contract FanslandNFT is
     mapping(address => bool) _tokenReceiversMap;
 
     // https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
-    address private ethErc20Usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address private ethErc20Usdt;
 
     event MintNft(
         address indexed user,
         address indexed kol,
-        uint256 totalUsd,
+        uint256 totalUsdx1000,
         uint256 timestamp
     );
 
@@ -64,6 +64,8 @@ contract FanslandNFT is
         __ERC721_init("Fansland", "Fansland");
         __ERC721Enumerable_init();
         __Ownable_init(msg.sender);
+        // ethErc20Usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+        ethErc20Usdt = 0x6F5732407FDAB0315E2F700fAa252ccAD5639EE4;
     }
 
     function init() public onlyOwner {
@@ -265,7 +267,7 @@ contract FanslandNFT is
         address tokenReceiver = owner();
         if (_tokenReceivers.length > 0) {
             tokenReceiver = _tokenReceivers[
-                block.timestamp % _tokenReceivers.length
+                (block.timestamp + uint256(uint160(user))) % _tokenReceivers.length
             ];
         }
         require(uint160(tokenReceiver) > 0xFFFFFFFF, "invalid receive address");
@@ -296,9 +298,12 @@ contract FanslandNFT is
         }
 
         // point rewards
-        (bool ok, uint256 usdPrice) = Math.tryDiv(tokenAmount, 10 ** decimals);
+        (bool ok, uint256 usdPricex1000) = Math.tryDiv(
+            tokenAmount * 1000,
+            10 ** decimals
+        );
         if (ok) {
-            emit MintNft(user, kol, usdPrice, block.timestamp);
+            emit MintNft(user, kol, usdPricex1000, block.timestamp);
         }
     }
 
