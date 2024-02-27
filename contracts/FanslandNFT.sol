@@ -17,6 +17,8 @@ contract FanslandNFT is
     UUPSUpgradeable
 {
     using SafeERC20 for IERC20;
+    using Math for uint256;
+
     struct NftType {
         uint8 id;
         string name;
@@ -27,7 +29,6 @@ contract FanslandNFT is
         bool isSaleActive;
     }
 
-    uint256 public tokenIdCounter;
     bool public openSale;
     string public baseURI;
     bool public allowTransfer;
@@ -36,11 +37,7 @@ contract FanslandNFT is
     uint256[] public nftTypeIds;
     mapping(uint256 => uint256) public tokenIdTypeMap;
     mapping(address => bool) paymentTokensMap;
-
-    address[] _tokenReceivers;
-
-    // https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
-    address private ethErc20Usdt;
+    address[] public tokenRecipients;
 
     event MintNft(
         address indexed user,
@@ -71,7 +68,6 @@ contract FanslandNFT is
         __ERC721Enumerable_init();
         __Ownable_init(msg.sender);
 
-        // ethErc20Usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
         allowTransfer = true;
         openSale = true;
         baseURI = "";
@@ -156,13 +152,9 @@ contract FanslandNFT is
         nftTypeMap[id].price = price;
     }
 
-    function _isEthErc20Usdt(address payToken) internal view returns (bool) {
-        return address(payToken) == address(ethErc20Usdt);
-    }
-
     function calculateTotal(
         address payToken,
-        uint256[] calldata typeIds,
+        uint8[] calldata typeIds,
         uint256[] calldata quantities
     ) public view returns (uint256) {
         require(typeIds.length == quantities.length, "Invalid parameters");
@@ -175,29 +167,23 @@ contract FanslandNFT is
 
             bool ok = false;
             uint256 result = 0;
-            (ok, result) = Math.tryAdd(
-                nftTypeMap[typeId].totalSupply,
-                quantities[i]
-            );
+            (ok, result) = nftTypeMap[typeId].totalSupply.tryAdd(quantities[i]);
             require(ok, "Quantity overflow");
             require(
                 nftTypeMap[typeId].maxSupply >= result,
                 "Exceed max supply of this type"
             );
 
-            (ok, result) = Math.tryMul(nftTypeMap[typeId].price, quantities[i]);
+            (ok, result) = nftTypeMap[typeId].price.tryMul(quantities[i]);
             require(ok, "Mul overflow");
 
-            (ok, result) = Math.tryAdd(result, totalPrice);
+            (ok, result) = result.tryAdd(totalPrice);
             require(ok, "TotalPrice overflow");
 
             totalPrice = result;
         }
 
-        // convert decimals
-        bool okDiv = false;
-        uint256 tokenAmount = 0;
-        (okDiv, tokenAmount) = Math.tryDiv(
+        (bool okDiv, uint256 tokenAmount) = Math.tryDiv(
             totalPrice,
             10 ** (18 - IERC20Metadata(payToken).decimals())
         );
@@ -208,36 +194,32 @@ contract FanslandNFT is
 
     function mintBatch(
         address payToken,
-        uint256[] calldata typeIds,
+        uint8[] calldata typeIds,
         uint256[] calldata quantities,
         address kol
     ) public whenOpenSale {
+        require(tokenRecipients.length > 0, "Empty tokenRecipients");
         uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
         address user = _msgSender();
 
-        address tokenReceiver = owner();
-        if (_tokenReceivers.length > 0) {
-            tokenReceiver = _tokenReceivers[
-                (tokenAmount + uint256(uint160(user)) + tokenIdCounter) %
-                    _tokenReceivers.length
-            ];
-        }
+        address recipient = tokenRecipients[
+            uint256(uint160(user)) % tokenRecipients.length
+        ];
+        require(recipient != address(0x0), "Invalid token receiver");
 
         IERC20 erc20Token = IERC20(payToken);
-
         require(
             erc20Token.allowance(user, address(this)) >= tokenAmount,
             "Allowance token is not enough"
         );
-        erc20Token.safeTransferFrom(user, tokenReceiver, tokenAmount);
+        erc20Token.safeTransferFrom(user, recipient, tokenAmount);
 
         for (uint i = 0; i < typeIds.length; i++) {
             _mintNFT(typeIds[i], user, quantities[i]);
         }
 
-        // point rewards
-        (bool ok, uint256 usdPricex1000) = Math.tryDiv(
-            tokenAmount * 1000,
+        // points
+        (bool ok, uint256 usdPricex1000) = (tokenAmount * 1000).tryDiv(
             10 ** uint256(IERC20Metadata(payToken).decimals())
         );
         if (ok) {
@@ -246,7 +228,7 @@ contract FanslandNFT is
     }
 
     function _mintNFT(uint256 typeId, address to, uint256 quantity) internal {
-        uint256 tokenId = tokenIdCounter;
+        uint256 tokenId = totalSupply();
         NftType memory nftType = nftTypeMap[typeId];
         require(nftType.isSaleActive, "not open sale ticket");
         for (uint i = 0; i < quantity; i++) {
@@ -262,7 +244,6 @@ contract FanslandNFT is
             nftTypeMap[typeId].totalSupply <= nftTypeMap[typeId].maxSupply,
             "tickets are not enough"
         );
-        tokenIdCounter += quantity;
     }
 
     function _increaseBalance(
@@ -337,7 +318,7 @@ contract FanslandNFT is
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721Upgradeable) returns (string memory) {
-        if (tokenId > tokenIdCounter) {
+        if (tokenId >= totalSupply()) {
             revert ERC721NonexistentToken(tokenId);
         }
 
