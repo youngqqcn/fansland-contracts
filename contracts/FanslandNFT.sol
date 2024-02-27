@@ -22,7 +22,7 @@ contract FanslandNFT is
     using Math for uint256;
 
     struct NftType {
-        uint8 id;
+        uint256 id;
         string name;
         string uri;
         uint256 maxSupply;
@@ -86,13 +86,39 @@ contract FanslandNFT is
         allowTransfer = status;
     }
 
-    function updatePaymentToken(
+    function updatePaymentTokens(
         address[] calldata tokens,
         bool[] calldata actives
     ) public onlyOwner {
-        require(tokens.length == actives.length, "invalid arguments");
+        require(tokens.length == actives.length, "Invalid arguments");
         for (uint n = 0; n < tokens.length; n++) {
             paymentTokensMap[tokens[n]] = actives[n];
+        }
+    }
+
+    function appendTokenRecipients(
+        address[] memory recipients
+    ) public onlyOwner {
+        require(recipients.length > 0, "Empty recipients");
+        for (uint n = 0; n < recipients.length; n++) {
+            require(recipients[n] != address(0x0), "Invalid recipient");
+            tokenRecipients.push(recipients[n]);
+        }
+    }
+
+    function removeTokenRecipients(
+        address[] memory recipients
+    ) public onlyOwner {
+        for (uint i = 0; i < recipients.length; i++) {
+            for (uint n = 0; n < tokenRecipients.length; n++) {
+                if (recipients[i] == tokenRecipients[n]) {
+                    tokenRecipients[n] = tokenRecipients[
+                        tokenRecipients.length - 1
+                    ];
+                    tokenRecipients.pop();
+                    break;
+                }
+            }
         }
     }
 
@@ -159,7 +185,7 @@ contract FanslandNFT is
 
     function calculateTotal(
         address payToken,
-        uint8[] calldata typeIds,
+        uint256[] calldata typeIds,
         uint256[] calldata quantities
     ) public view returns (uint256) {
         require(typeIds.length == quantities.length, "Invalid parameters");
@@ -199,7 +225,7 @@ contract FanslandNFT is
 
     function mintBatch(
         address payToken,
-        uint8[] calldata typeIds,
+        uint256[] calldata typeIds,
         uint256[] calldata quantities,
         address kol
     ) public whenOpenSale nonReentrant {
