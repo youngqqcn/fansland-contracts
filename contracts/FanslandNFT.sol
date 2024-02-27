@@ -3,13 +3,12 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
-
-import "./IERC20Usdt.sol";
 
 contract FanslandNFT is
     Initializable,
@@ -17,6 +16,7 @@ contract FanslandNFT is
     OwnableUpgradeable,
     UUPSUpgradeable
 {
+    using SafeERC20 for IERC20;
     struct NftType {
         uint8 id;
         string name;
@@ -33,15 +33,11 @@ contract FanslandNFT is
     bool public allowTransfer;
 
     mapping(uint256 => NftType) public nftTypeMap;
-    mapping(uint256 => bool) public nftTypeExistsMap;
     uint256[] public nftTypeIds;
     mapping(uint256 => uint256) public tokenIdTypeMap;
-
-    mapping(address => bool) _paymentTokensMap;
-    address[] public paymentTokens;
+    mapping(address => bool) paymentTokensMap;
 
     address[] _tokenReceivers;
-    mapping(address => bool) _tokenReceiversMap;
 
     // https://etherscan.io/token/0xdac17f958d2ee523a2206206994597c13d831ec7#code
     address private ethErc20Usdt;
@@ -52,6 +48,16 @@ contract FanslandNFT is
         uint256 totalUsdx1000,
         uint256 timestamp
     );
+
+    modifier whenOpenSale() {
+        require(openSale, "Not on sale");
+        _;
+    }
+
+    modifier whenAllowTransfer() {
+        require(allowTransfer, "Transfer is not permitted");
+        _;
+    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -64,64 +70,19 @@ contract FanslandNFT is
         __ERC721_init("Fansland", "Fansland");
         __ERC721Enumerable_init();
         __Ownable_init(msg.sender);
+
         // ethErc20Usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
-        ethErc20Usdt = 0x6F5732407FDAB0315E2F700fAa252ccAD5639EE4;
-    }
-
-    function init() public onlyOwner {
         allowTransfer = true;
-
         openSale = true;
-        baseURI = "ipfs://bafybeif6qumbfl6y75o2gortc4w4f2m5ksjmvypa5zwlgcxec5l4x2r3ya/";
-
-        updateNftType(0, "Fansland type 0", "0", 100, 0, 0.1 ether, true);
-        updateNftType(1, "Fansland type 1", "1", 100, 0, 1 ether, true);
+        baseURI = "";
     }
 
-    modifier whenOpenSale() {
-        require(openSale, "Sale must be active to mint NFT");
-        _;
-    }
-
-    modifier whenAllowTransfer() {
-        require(allowTransfer, "transfer is not permitted");
-        _;
-    }
-
-    function getAllTypeTypeIds() public view returns (uint256[] memory) {
+    function getNftTypeTypeIds() public view returns (uint256[] memory) {
         return nftTypeIds;
     }
 
     function updateAllowTransfer(bool status) public onlyOwner {
         allowTransfer = status;
-    }
-
-    function updateTokenReceivers(
-        address[] calldata receivers,
-        bool[] calldata bools
-    ) public onlyOwner {
-        require(receivers.length == bools.length, "invalid arguments");
-        for (uint i = 0; i < receivers.length; i++) {
-            address addr = receivers[i];
-            require(uint160(addr) > 0xFFFFFFFF, "invalid receive address");
-            if (bools[i]) {
-                if (!_tokenReceiversMap[addr]) {
-                    _tokenReceivers.push(addr);
-                }
-            } else {
-                // remove
-                for (uint j = 0; j < _tokenReceivers.length; j++) {
-                    if (_tokenReceivers[j] == addr) {
-                        _tokenReceivers[j] = _tokenReceivers[
-                            _tokenReceivers.length - 1
-                        ];
-                        _tokenReceivers.pop();
-                        break;
-                    }
-                }
-            }
-            _tokenReceiversMap[addr] = bools[i];
-        }
     }
 
     function updatePaymentToken(
@@ -130,67 +91,69 @@ contract FanslandNFT is
     ) public onlyOwner {
         require(tokens.length == actives.length, "invalid arguments");
         for (uint n = 0; n < tokens.length; n++) {
-            address token = tokens[n];
-            bool active = actives[n];
-            _paymentTokensMap[token] = active;
-            if (active) {
-                paymentTokens.push(token);
-            } else {
-                // remove token
-                for (uint i = 0; i < paymentTokens.length; i++) {
-                    if (paymentTokens[i] == token) {
-                        paymentTokens[i] = paymentTokens[
-                            paymentTokens.length - 1
-                        ];
-                        paymentTokens.pop();
-                        break;
-                    }
-                }
-            }
+            paymentTokensMap[tokens[n]] = actives[n];
         }
     }
 
-    function tokenIsAllowed(address token) public view returns (bool) {
-        return _paymentTokensMap[token];
-    }
-
-    function updateNftType(
+    function addNftType(
         uint8 id,
         string memory typeName,
         string memory uri,
-        uint256 maxsupply,
-        uint256 curSupply,
+        uint256 maxSupply,
         uint256 price,
         bool saleActive
     ) public onlyOwner {
+        require(
+            maxSupply > 0 && bytes(typeName).length > 0,
+            "Invalid parameters"
+        );
+        require(
+            nftTypeMap[id].maxSupply == 0 &&
+                bytes(nftTypeMap[id].name).length == 0,
+            "Id already exists"
+        );
+
         nftTypeMap[id] = NftType({
             id: id,
             name: typeName,
             uri: uri,
-            maxSupply: maxsupply,
-            totalSupply: curSupply,
+            maxSupply: maxSupply,
+            totalSupply: 0,
             price: price,
             isSaleActive: saleActive
         });
-
-        if (!nftTypeExistsMap[id]) {
-            nftTypeIds.push(id);
-            nftTypeExistsMap[id] = true;
-        }
     }
 
-    function removeNftType(uint256 id) public onlyOwner {
-        delete nftTypeMap[id];
-        nftTypeExistsMap[id] = false;
+    function updateNftTypeURI(uint8 id, string memory uri) public onlyOwner {
+        nftTypeMap[id].uri = uri;
+    }
 
-        // remove nft typeid from nftTypeIds
-        for (uint i = 0; i < nftTypeIds.length; i++) {
-            if (nftTypeIds[i] == id) {
-                nftTypeIds[i] = nftTypeIds[nftTypeIds.length - 1];
-                nftTypeIds.pop();
-                break;
-            }
-        }
+    function updateNftTypeName(
+        uint8 id,
+        string memory typeName
+    ) public onlyOwner {
+        require(bytes(typeName).length > 0, "Invalid typeName");
+        nftTypeMap[id].name = typeName;
+    }
+
+    function updateNftTypeMaxSupply(
+        uint8 id,
+        uint256 maxSupply
+    ) public onlyOwner {
+        require(
+            maxSupply > 0 && maxSupply >= nftTypeMap[id].totalSupply,
+            "Invalid maxSupply"
+        );
+        nftTypeMap[id].maxSupply = maxSupply;
+    }
+
+    function updateNftTypeSaleActive(uint8 id, bool sale) public onlyOwner {
+        nftTypeMap[id].isSaleActive = sale;
+    }
+
+    function updateNftTypePrice(uint8 id, uint256 price) public onlyOwner {
+        require(price > 0 && price < 100_000_000 ether);
+        nftTypeMap[id].price = price;
     }
 
     function _isEthErc20Usdt(address payToken) internal view returns (bool) {
@@ -202,20 +165,13 @@ contract FanslandNFT is
         uint256[] calldata typeIds,
         uint256[] calldata quantities
     ) public view returns (uint256) {
-        require(typeIds.length == quantities.length, "args length not match");
-        require(tokenIsAllowed(payToken), "payment token not support");
-        uint256 decimals = 0;
-        if (_isEthErc20Usdt(payToken)) {
-            decimals = IERC20Usdt(payToken).decimals();
-        } else {
-            decimals = IERC20Metadata(payToken).decimals();
-        }
+        require(typeIds.length == quantities.length, "Invalid parameters");
+        require(paymentTokensMap[payToken], "Invalid payment token");
 
-        // get the total price of all NFT
         uint256 totalPrice = 0;
         for (uint i = 0; i < typeIds.length; i++) {
             uint256 typeId = typeIds[i];
-            require(nftTypeExistsMap[typeId], "invalid typeId");
+            require(nftTypeMap[typeId].maxSupply > 0, "Unavailable NFT type");
 
             bool ok = false;
             uint256 result = 0;
@@ -223,17 +179,17 @@ contract FanslandNFT is
                 nftTypeMap[typeId].totalSupply,
                 quantities[i]
             );
-            require(ok, "quantity overflow");
+            require(ok, "Quantity overflow");
             require(
                 nftTypeMap[typeId].maxSupply >= result,
-                "Purchase would exceed max supply of NFTs"
+                "Exceed max supply of this type"
             );
 
             (ok, result) = Math.tryMul(nftTypeMap[typeId].price, quantities[i]);
-            require(ok, "mul overflow");
+            require(ok, "Mul overflow");
 
             (ok, result) = Math.tryAdd(result, totalPrice);
-            require(ok, "add overflow");
+            require(ok, "TotalPrice overflow");
 
             totalPrice = result;
         }
@@ -241,8 +197,11 @@ contract FanslandNFT is
         // convert decimals
         bool okDiv = false;
         uint256 tokenAmount = 0;
-        (okDiv, tokenAmount) = Math.tryDiv(totalPrice, 10 ** (18 - decimals));
-        require(okDiv, "div overflow");
+        (okDiv, tokenAmount) = Math.tryDiv(
+            totalPrice,
+            10 ** (18 - IERC20Metadata(payToken).decimals())
+        );
+        require(okDiv, "Div overflow");
 
         return tokenAmount;
     }
@@ -253,44 +212,24 @@ contract FanslandNFT is
         uint256[] calldata quantities,
         address kol
     ) public whenOpenSale {
-        require(
-            typeIds.length > 0 &&
-                quantities.length > 0 &&
-                typeIds.length == quantities.length,
-            "args length not match"
-        );
-        require(tokenIsAllowed(payToken), "payment token not support");
-        uint256 decimals = 0;
-        address user = _msgSender();
         uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
+        address user = _msgSender();
 
         address tokenReceiver = owner();
         if (_tokenReceivers.length > 0) {
             tokenReceiver = _tokenReceivers[
-                (tokenAmount + uint256(uint160(user)) + tokenIdCounter) % _tokenReceivers.length
+                (tokenAmount + uint256(uint160(user)) + tokenIdCounter) %
+                    _tokenReceivers.length
             ];
         }
 
-        if (_isEthErc20Usdt(payToken)) {
-            IERC20Usdt usdt = IERC20Usdt(payToken);
-            decimals = usdt.decimals();
-            require(
-                usdt.allowance(user, address(this)) >= tokenAmount,
-                "allowance token is not enough"
-            );
-            usdt.transferFrom(user, tokenReceiver, tokenAmount);
-        } else {
-            IERC20Metadata erc20Token = IERC20Metadata(payToken);
-            decimals = erc20Token.decimals();
-            require(
-                erc20Token.allowance(user, address(this)) >= tokenAmount,
-                "allowance token is not enough"
-            );
-            require(
-                erc20Token.transferFrom(user, tokenReceiver, tokenAmount),
-                "transferFrom failed"
-            );
-        }
+        IERC20 erc20Token = IERC20(payToken);
+
+        require(
+            erc20Token.allowance(user, address(this)) >= tokenAmount,
+            "Allowance token is not enough"
+        );
+        erc20Token.safeTransferFrom(user, tokenReceiver, tokenAmount);
 
         for (uint i = 0; i < typeIds.length; i++) {
             _mintNFT(typeIds[i], user, quantities[i]);
@@ -299,7 +238,7 @@ contract FanslandNFT is
         // point rewards
         (bool ok, uint256 usdPricex1000) = Math.tryDiv(
             tokenAmount * 1000,
-            10 ** decimals
+            10 ** uint256(IERC20Metadata(payToken).decimals())
         );
         if (ok) {
             emit MintNft(user, kol, usdPricex1000, block.timestamp);
@@ -307,14 +246,12 @@ contract FanslandNFT is
     }
 
     function _mintNFT(uint256 typeId, address to, uint256 quantity) internal {
-        require(nftTypeExistsMap[typeId], "invalid typeId");
-
         uint256 tokenId = tokenIdCounter;
         NftType memory nftType = nftTypeMap[typeId];
         require(nftType.isSaleActive, "not open sale ticket");
         for (uint i = 0; i < quantity; i++) {
             uint256 curTokenId = tokenId + i;
-            _mint(to, curTokenId);
+            _safeMint(to, curTokenId);
 
             tokenIdTypeMap[curTokenId] = typeId;
         }
