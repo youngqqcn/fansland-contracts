@@ -9,11 +9,13 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
 contract FanslandNFT is
     Initializable,
     ERC721EnumerableUpgradeable,
     OwnableUpgradeable,
+    ReentrancyGuardUpgradeable,
     UUPSUpgradeable
 {
     using SafeERC20 for IERC20;
@@ -66,11 +68,14 @@ contract FanslandNFT is
     function initialize() public initializer {
         __ERC721_init("Fansland", "Fansland");
         __ERC721Enumerable_init();
+        __ReentrancyGuard_init();
         __Ownable_init(msg.sender);
 
         allowTransfer = true;
         openSale = true;
         baseURI = "";
+        nftTypeIds = new uint256[](0);
+        tokenRecipients = new address[](0);
     }
 
     function getNftTypeTypeIds() public view returns (uint256[] memory) {
@@ -197,7 +202,7 @@ contract FanslandNFT is
         uint8[] calldata typeIds,
         uint256[] calldata quantities,
         address kol
-    ) public whenOpenSale {
+    ) public whenOpenSale nonReentrant {
         require(tokenRecipients.length > 0, "Empty tokenRecipients");
         uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
         address user = _msgSender();
@@ -227,18 +232,16 @@ contract FanslandNFT is
         }
     }
 
-    function _mintNFT(uint256 typeId, address to, uint256 quantity) internal {
+    function _mintNFT(uint256 typeId, address to, uint256 quantity) private {
         uint256 tokenId = totalSupply();
         NftType memory nftType = nftTypeMap[typeId];
         require(nftType.isSaleActive, "not open sale ticket");
         for (uint i = 0; i < quantity; i++) {
             uint256 curTokenId = tokenId + i;
             _safeMint(to, curTokenId);
-
             tokenIdTypeMap[curTokenId] = typeId;
         }
 
-        tokenIdTypeMap[typeId] = typeId;
         nftTypeMap[typeId].totalSupply += quantity;
         require(
             nftTypeMap[typeId].totalSupply <= nftTypeMap[typeId].maxSupply,
