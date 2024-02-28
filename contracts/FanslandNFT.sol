@@ -149,6 +149,7 @@ contract FanslandNFT is
             price: price,
             isSaleActive: saleActive
         });
+        nftTypeIds.push(id);
     }
 
     function updateNftTypeURI(uint8 id, string memory uri) public onlyOwner {
