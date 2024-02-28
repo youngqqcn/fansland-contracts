@@ -38,7 +38,7 @@ contract FanslandNFT is
     mapping(uint256 => NftType) public nftTypeMap;
     uint256[] public nftTypeIds;
     mapping(uint256 => uint256) public tokenIdTypeMap;
-    mapping(address => bool) paymentTokensMap;
+    mapping(address => bool) public paymentTokensMap;
     address[] public tokenRecipients;
 
     event MintNft(
@@ -123,7 +123,7 @@ contract FanslandNFT is
     }
 
     function addNftType(
-        uint8 id,
+        uint256 id,
         string memory typeName,
         string memory uri,
         uint256 maxSupply,
@@ -249,19 +249,23 @@ contract FanslandNFT is
             _mintNFT(typeIds[i], user, quantities[i]);
         }
 
-        // points
         (bool ok, uint256 usdPricex1000) = (tokenAmount * 1000).tryDiv(
             10 ** uint256(IERC20Metadata(payToken).decimals())
         );
         if (ok) {
-            emit MintNft(user, kol, usdPricex1000, block.timestamp);
+            emit MintNft(
+                user,
+                (kol == user) ? address(0x0) : kol,
+                usdPricex1000,
+                block.timestamp
+            );
         }
     }
 
     function _mintNFT(uint256 typeId, address to, uint256 quantity) private {
         uint256 tokenId = totalSupply();
         NftType memory nftType = nftTypeMap[typeId];
-        require(nftType.isSaleActive, "not open sale ticket");
+        require(nftType.isSaleActive, "Not on sale");
         for (uint i = 0; i < quantity; i++) {
             uint256 curTokenId = tokenId + i;
             _safeMint(to, curTokenId);
@@ -271,7 +275,7 @@ contract FanslandNFT is
         nftTypeMap[typeId].totalSupply += quantity;
         require(
             nftTypeMap[typeId].totalSupply <= nftTypeMap[typeId].maxSupply,
-            "tickets are not enough"
+            "Not enough tickets mint"
         );
     }
 
@@ -282,7 +286,6 @@ contract FanslandNFT is
         super._increaseBalance(account, value);
     }
 
-    /// @dev _update
     function _update(
         address to,
         uint256 tokenId,
@@ -291,26 +294,17 @@ contract FanslandNFT is
         return super._update(to, tokenId, auth);
     }
 
-    /// @notice Returns a list of all NFT IDs assigned to an address.
-    /// @param _owner The owner whose NFTs we are interested in.
-    /// @dev This method MUST NEVER be called by smart contract code. First, it's fairly
-    ///  expensive (it walks the entire Kitty array looking for cats belonging to owner),
-    ///  but it also returns a dynamic array, which is only supported for web3 calls, and
-    ///  not contract-to-contract calls.
     function tokensOfOwner(
         address _owner
     ) public view returns (uint256[] memory ownerTokens) {
         uint256 tokenCount = balanceOf(_owner);
 
         if (tokenCount == 0) {
-            // Return an empty array
             return new uint256[](0);
         } else {
             uint256[] memory result = new uint256[](tokenCount);
             uint256 resultIndex = 0;
 
-            // We count on the fact that all cats have IDs starting at 1 and increasing
-            // sequentially up to the total count.
             for (uint256 index = 0; index < tokenCount; index++) {
                 result[resultIndex] = tokenOfOwnerByIndex(_owner, index);
                 resultIndex++;
@@ -362,7 +356,7 @@ contract FanslandNFT is
 
     receive() external payable {
         if (msg.value > 0) {
-            revert("do not send eth to this contract directly");
+            revert("DO NOT deposit");
         }
     }
 }
