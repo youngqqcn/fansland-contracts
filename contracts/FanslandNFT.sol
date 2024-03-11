@@ -66,7 +66,7 @@ contract FanslandNFT is
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function initialize() public initializer {
-        __ERC721_init("Fansland", "Fansland");
+        __ERC721_init("Fansland Web3.0 Music Festival 2024", "Fansland");
         __ERC721Enumerable_init();
         __ReentrancyGuard_init();
         __Ownable_init(msg.sender);

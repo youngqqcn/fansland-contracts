@@ -1,31 +1,23 @@
 {
-    "description": "Fansland is The World's First Web3 Music Festival.",
+    "description": "Fansland is the first redefines music festival experience with innovative Web3.0 technology, art and music will be landed in Bangkok 2024. We're All Gonna Make It.",
     "image": "ipfs://bafybeieawzz6q3u7lqbnodctnknirquqo3j2iejeju3w544lksloa4jcgy",
-    "name": "Fansland 2024 Early Bird Ticket",
+    "name": "Early Bird",
     "attributes": [
         {
-            "trait_type": "Ticket Type",
-            "value": "Early Bird"
-        },
-        {
             "trait_type": "Event Name",
-            "value": "Fansland Web3 Music Festival 2024"
+            "value": "Fansland Web3.0 Music Festival 2024"
         },
         {
-            "trait_type": "Event Date",
-            "value": "4-5 May 2024"
+            "trait_type": "Ticket Type",
+            "value": "Early Bird 2 Days Ticket"
         },
         {
-            "trait_type": "Location",
-            "value": "Bangkok, Thailand"
+            "trait_type": "Event Time",
+            "value": "6PM 4-5 May 2024"
         },
         {
-            "trait_type": "Seat",
-            "value": "No Seat"
-        },
-        {
-            "trait_type": "Check-in",
-            "value": "QR Code Check-in"
+            "trait_type": "Event Location",
+            "value": "Impact Exhibition Hall 5-8, Bangkok, Thailand"
         },
         {
             "trait_type": "Website",
