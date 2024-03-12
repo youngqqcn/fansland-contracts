@@ -122,6 +122,15 @@ contract FanslandNFT is
         }
     }
 
+    function _checkTypeIdExists(uint256 id) internal view returns (bool) {
+        for (uint i = 0; i < nftTypeIds.length; i++) {
+            if (id == nftTypeIds[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function addNftType(
         uint256 id,
         string memory typeName,
@@ -130,14 +139,10 @@ contract FanslandNFT is
         uint256 price,
         bool saleActive
     ) public onlyOwner {
+        require(!_checkTypeIdExists(id), "Id already exists");
         require(
             maxSupply > 0 && bytes(typeName).length > 0,
             "Invalid parameters"
-        );
-        require(
-            nftTypeMap[id].maxSupply == 0 &&
-                bytes(nftTypeMap[id].name).length == 0,
-            "Id already exists"
         );
 
         nftTypeMap[id] = NftType({
@@ -153,6 +158,7 @@ contract FanslandNFT is
     }
 
     function updateNftTypeURI(uint8 id, string memory uri) public onlyOwner {
+        require(_checkTypeIdExists(id), "Id not exists");
         nftTypeMap[id].uri = uri;
     }
 
@@ -160,6 +166,7 @@ contract FanslandNFT is
         uint8 id,
         string memory typeName
     ) public onlyOwner {
+        require(_checkTypeIdExists(id), "Id not exists");
         require(bytes(typeName).length > 0, "Invalid typeName");
         nftTypeMap[id].name = typeName;
     }
@@ -168,6 +175,7 @@ contract FanslandNFT is
         uint8 id,
         uint256 maxSupply
     ) public onlyOwner {
+        require(_checkTypeIdExists(id), "Id not exists");
         require(
             maxSupply > 0 && maxSupply >= nftTypeMap[id].totalSupply,
             "Invalid maxSupply"
@@ -176,10 +184,12 @@ contract FanslandNFT is
     }
 
     function updateNftTypeSaleActive(uint8 id, bool sale) public onlyOwner {
+        require(_checkTypeIdExists(id), "Id not exists");
         nftTypeMap[id].isSaleActive = sale;
     }
 
     function updateNftTypePrice(uint8 id, uint256 price) public onlyOwner {
+        require(_checkTypeIdExists(id), "Id not exists");
         require(price > 0 && price < 100_000_000 ether);
         nftTypeMap[id].price = price;
     }
@@ -233,11 +243,13 @@ contract FanslandNFT is
         require(tokenRecipients.length > 0, "Empty tokenRecipients");
         uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
         address user = _msgSender();
-
         address recipient = tokenRecipients[
             uint256(uint160(user)) % tokenRecipients.length
         ];
-        require(recipient != address(0x0), "Invalid token receiver");
+        require(
+            recipient != address(0x0) && recipient != user,
+            "Invalid token receiver"
+        );
 
         IERC20 erc20Token = IERC20(payToken);
         require(
@@ -304,11 +316,9 @@ contract FanslandNFT is
             return new uint256[](0);
         } else {
             uint256[] memory result = new uint256[](tokenCount);
-            uint256 resultIndex = 0;
 
             for (uint256 index = 0; index < tokenCount; index++) {
-                result[resultIndex] = tokenOfOwnerByIndex(_owner, index);
-                resultIndex++;
+                result[index] = tokenOfOwnerByIndex(_owner, index);
             }
             return result;
         }
