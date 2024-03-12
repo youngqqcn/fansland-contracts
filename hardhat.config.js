@@ -40,6 +40,12 @@ module.exports = {
       accounts: [process.env.MAINNET_PRIVATE_KEY],
       gasPrice: 3_000_000_000,
     },
+    bsc_main_pro: {
+        url: "https://bsc-mainnet.nodereal.io/v1/562f81c9848e40b2b6040577a8eb9f41",
+        chainId: 56,
+        accounts: [process.env.PRO_PRIVATE_KEY],
+        gasPrice: 3_000_000_000,
+    },
     eth_main: {
       url: "https://eth-mainnet.nodereal.io/v1/e40cb1b6dad04c28878c1829c0dacc43",
       chainId: 1,
@@ -149,11 +155,11 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.8.20",
+        version: "0.8.24",
         settings: {
           optimizer: {
             enabled: true,
-            runs: 100,
+            runs: 10000,
           },
         },
       },
@@ -162,7 +168,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 100,
+            runs: 10000,
           },
         },
       },

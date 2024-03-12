@@ -21,9 +21,9 @@ async function deploy_all() {
   console.log("增加票型");
   const tx1 = await nft.addNftType(
     "0",
-    "Early Bird",
+    "Early Bird 2 Days Ticket",
     "ipfs://bafkreic4ffkdf4he4flyx4skbe77452radqeom6c6uig4ndir4tjqtgism",
-    "1000", // TODO: 库存
+    "1000",
     "99000000000000000000", // 99 USD
     true
   );
@@ -42,7 +42,7 @@ async function deploy_all() {
       "0x55d398326f99059ff775485246999027b3197955", // bsc USDT
       "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d", // bsc USDC
     ],
-    [true, true, true]
+    [true, true]
   );
   console.log(r1.hash);
 }
