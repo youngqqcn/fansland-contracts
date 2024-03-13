@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 
@@ -19,7 +18,6 @@ contract FanslandNFT is
     UUPSUpgradeable
 {
     using SafeERC20 for IERC20;
-    using Math for uint256;
 
     struct NftType {
         uint256 id;
@@ -201,35 +199,28 @@ contract FanslandNFT is
     ) public view returns (uint256) {
         require(typeIds.length == quantities.length, "Invalid parameters");
         require(paymentTokensMap[payToken], "Invalid payment token");
+        for (uint i = 0; i < typeIds.length - 1; i++) {
+            for (uint j = i + 1; j < typeIds.length; j++) {
+                require(typeIds[i] != typeIds[j], "Duplicate id");
+            }
+        }
 
         uint256 totalPrice = 0;
         for (uint i = 0; i < typeIds.length; i++) {
             uint256 typeId = typeIds[i];
             require(nftTypeMap[typeId].maxSupply > 0, "Unavailable NFT type");
 
-            bool ok = false;
-            uint256 result = 0;
-            (ok, result) = nftTypeMap[typeId].totalSupply.tryAdd(quantities[i]);
-            require(ok, "Quantity overflow");
             require(
-                nftTypeMap[typeId].maxSupply >= result,
+                nftTypeMap[typeId].maxSupply >=
+                    nftTypeMap[typeId].totalSupply + quantities[i],
                 "Exceed max supply of this type"
             );
 
-            (ok, result) = nftTypeMap[typeId].price.tryMul(quantities[i]);
-            require(ok, "Mul overflow");
-
-            (ok, result) = result.tryAdd(totalPrice);
-            require(ok, "TotalPrice overflow");
-
-            totalPrice = result;
+            totalPrice = nftTypeMap[typeId].price * quantities[i] + totalPrice;
         }
 
-        (bool okDiv, uint256 tokenAmount) = Math.tryDiv(
-            totalPrice,
-            10 ** (18 - IERC20Metadata(payToken).decimals())
-        );
-        require(okDiv, "Div overflow");
+        uint256 tokenAmount = totalPrice /
+            (10 ** (18 - IERC20Metadata(payToken).decimals()));
 
         return tokenAmount;
     }
@@ -262,17 +253,14 @@ contract FanslandNFT is
             _mintNFT(typeIds[i], user, quantities[i]);
         }
 
-        (bool ok, uint256 usdPricex1000) = (tokenAmount * 1000).tryDiv(
-            10 ** uint256(IERC20Metadata(payToken).decimals())
+        uint256 usdPricex1000 = (tokenAmount * 1000) /
+            (10 ** uint256(IERC20Metadata(payToken).decimals()));
+        emit MintNft(
+            user,
+            (kol == user) ? address(0x0) : kol,
+            usdPricex1000,
+            block.timestamp
         );
-        if (ok) {
-            emit MintNft(
-                user,
-                (kol == user) ? address(0x0) : kol,
-                usdPricex1000,
-                block.timestamp
-            );
-        }
     }
 
     function _mintNFT(uint256 typeId, address to, uint256 quantity) private {
@@ -286,10 +274,6 @@ contract FanslandNFT is
         }
 
         nftTypeMap[typeId].totalSupply += quantity;
-        require(
-            nftTypeMap[typeId].totalSupply <= nftTypeMap[typeId].maxSupply,
-            "Not enough tickets mint"
-        );
     }
 
     function _increaseBalance(
