@@ -36,15 +36,14 @@ contract FanslandNFT is
     mapping(uint256 => NftType) public nftTypeMap;
     uint256[] public nftTypeIds;
     mapping(uint256 => uint256) public tokenIdTypeMap;
-    mapping(address => bool) public paymentTokensMap;
     address[] public tokenRecipients;
 
-    event MintNft(
-        address indexed user,
-        address indexed kol,
-        uint256 totalUsdx1000,
-        uint256 timestamp
-    );
+    struct Whitelist {
+        uint256 mintedCounts; // the minted count of this type
+        uint256 maxCounts; // the max count of of this type
+    }
+
+    mapping(uint256 => mapping(address => Whitelist)) whitelists;
 
     modifier whenOpenSale() {
         require(openSale, "Not on sale");
@@ -64,7 +63,7 @@ contract FanslandNFT is
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function initialize() public initializer {
-        __ERC721_init("Fansland Web3.0 Music Festival 2024", "Fansland");
+        __ERC721_init("X Layer", "X Layer");
         __ERC721Enumerable_init();
         __ReentrancyGuard_init();
         __Ownable_init(msg.sender);
@@ -76,48 +75,35 @@ contract FanslandNFT is
         tokenRecipients = new address[](0);
     }
 
+    function addWhitelists(
+        uint256[] memory typeIds,
+        address[] memory addrs,
+        uint256[] memory counts
+    ) public onlyOwner {
+        require(
+            typeIds.length == addrs.length && addrs.length == counts.length,
+            "invalid args"
+        );
+
+        for (uint i = 0; i < addrs.length; i++) {
+            Whitelist memory old = whitelists[typeIds[i]][addrs[i]];
+            require(
+                counts[i] >= old.mintedCounts,
+                "new max count must GE than minted count"
+            );
+            whitelists[typeIds[i]][addrs[i]] = Whitelist(
+                old.mintedCounts,
+                counts[i]
+            );
+        }
+    }
+
     function getNftTypeTypeIds() public view returns (uint256[] memory) {
         return nftTypeIds;
     }
 
     function updateAllowTransfer(bool status) public onlyOwner {
         allowTransfer = status;
-    }
-
-    function updatePaymentTokens(
-        address[] calldata tokens,
-        bool[] calldata actives
-    ) public onlyOwner {
-        require(tokens.length == actives.length, "Invalid arguments");
-        for (uint n = 0; n < tokens.length; n++) {
-            paymentTokensMap[tokens[n]] = actives[n];
-        }
-    }
-
-    function appendTokenRecipients(
-        address[] memory recipients
-    ) public onlyOwner {
-        require(recipients.length > 0, "Empty recipients");
-        for (uint n = 0; n < recipients.length; n++) {
-            require(recipients[n] != address(0x0), "Invalid recipient");
-            tokenRecipients.push(recipients[n]);
-        }
-    }
-
-    function removeTokenRecipients(
-        address[] memory recipients
-    ) public onlyOwner {
-        for (uint i = 0; i < recipients.length; i++) {
-            for (uint n = 0; n < tokenRecipients.length; n++) {
-                if (recipients[i] == tokenRecipients[n]) {
-                    tokenRecipients[n] = tokenRecipients[
-                        tokenRecipients.length - 1
-                    ];
-                    tokenRecipients.pop();
-                    break;
-                }
-            }
-        }
     }
 
     function _checkTypeIdExists(uint256 id) internal view returns (bool) {
@@ -192,78 +178,37 @@ contract FanslandNFT is
         nftTypeMap[id].price = price;
     }
 
-    function calculateTotal(
-        address payToken,
+    function mintBatch(
+        address recipient,
         uint256[] calldata typeIds,
         uint256[] calldata quantities
-    ) public view returns (uint256) {
-        require(typeIds.length == quantities.length, "Invalid parameters");
-        require(paymentTokensMap[payToken], "Invalid payment token");
-        for (uint i = 0; i < typeIds.length - 1; i++) {
-            for (uint j = i + 1; j < typeIds.length; j++) {
-                require(typeIds[i] != typeIds[j], "Duplicate id");
-            }
+    ) public whenOpenSale nonReentrant {
+        require(typeIds.length == quantities.length, "invalid arguments");
+
+        if (recipient == address(0x0)) {
+            recipient = _msgSender();
         }
 
-        uint256 totalPrice = 0;
         for (uint i = 0; i < typeIds.length; i++) {
-            uint256 typeId = typeIds[i];
-            require(nftTypeMap[typeId].maxSupply > 0, "Unavailable NFT type");
-
+            // whitelist check
+            Whitelist memory w = whitelists[typeIds[i]][_msgSender()];
             require(
-                nftTypeMap[typeId].maxSupply >=
-                    nftTypeMap[typeId].totalSupply + quantities[i],
-                "Exceed max supply of this type"
+                w.mintedCounts + quantities[i] <= w.maxCounts,
+                "out of limit count"
             );
 
-            totalPrice = nftTypeMap[typeId].price * quantities[i] + totalPrice;
+            _mintNFT(typeIds[i], recipient, quantities[i]);
+
+            whitelists[typeIds[i]][_msgSender()] = Whitelist(
+                w.mintedCounts + quantities[i],
+                w.maxCounts
+            );
         }
-
-        uint256 tokenAmount = totalPrice /
-            (10 ** (18 - IERC20Metadata(payToken).decimals()));
-
-        return tokenAmount;
-    }
-
-    function mintBatch(
-        address payToken,
-        uint256[] calldata typeIds,
-        uint256[] calldata quantities,
-        address kol
-    ) public whenOpenSale nonReentrant {
-        require(tokenRecipients.length > 0, "Empty tokenRecipients");
-        uint256 tokenAmount = calculateTotal(payToken, typeIds, quantities);
-        address user = _msgSender();
-        address recipient = tokenRecipients[
-            uint256(uint160(user)) % tokenRecipients.length
-        ];
-        require(
-            recipient != address(0x0) && recipient != user,
-            "Invalid token receiver"
-        );
-
-        IERC20 erc20Token = IERC20(payToken);
-        require(
-            erc20Token.allowance(user, address(this)) >= tokenAmount,
-            "Allowance token is not enough"
-        );
-        erc20Token.safeTransferFrom(user, recipient, tokenAmount);
-
-        for (uint i = 0; i < typeIds.length; i++) {
-            _mintNFT(typeIds[i], user, quantities[i]);
-        }
-
-        uint256 usdPricex1000 = (tokenAmount * 1000) /
-            (10 ** uint256(IERC20Metadata(payToken).decimals()));
-        emit MintNft(
-            user,
-            (kol == user) ? address(0x0) : kol,
-            usdPricex1000,
-            block.timestamp
-        );
     }
 
     function _mintNFT(uint256 typeId, address to, uint256 quantity) private {
+        require(_checkTypeIdExists(typeId), "Id not exists");
+
         uint256 tokenId = totalSupply();
         NftType memory nftType = nftTypeMap[typeId];
         require(nftType.isSaleActive, "Not on sale");

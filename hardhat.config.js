@@ -151,6 +151,11 @@ module.exports = {
       chainId: 59140,
       accounts: [process.env.TESTNET_PRIVATE_KEY],
     },
+    xlayer_test: {
+        url: "https://testrpc.x1.tech/",
+        chainId: 195,
+        accounts: [process.env.TESTNET_PRIVATE_KEY],
+    }
   },
   solidity: {
     compilers: [
