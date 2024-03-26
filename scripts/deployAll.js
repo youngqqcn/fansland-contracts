@@ -11,30 +11,35 @@ function mySleep(ms) {
 }
 
 async function deploy_all() {
-//   console.log("部署USDT合约");
-//   const usdt = await hre.ethers.deployContract("USDT");
-//   await usdt.waitForDeployment();
-//   console.log(`USDT合约: ${usdt.target}`);
-//   //   await mySleep(5000);
+  //   console.log("部署USDT合约");
+  //   const usdt = await hre.ethers.deployContract("USDT");
+  //   await usdt.waitForDeployment();
+  //   console.log(`USDT合约: ${usdt.target}`);
+  //   //   await mySleep(5000);
 
-//   console.log("部署USDC合约");
-//   const usdc = await hre.ethers.deployContract("USDC");
-//   await usdc.waitForDeployment();
-//   console.log(`USDC合约: ${usdc.target}`);
-//   await mySleep(5000);
+  //   console.log("部署USDC合约");
+  //   const usdc = await hre.ethers.deployContract("USDC");
+  //   await usdc.waitForDeployment();
+  //   console.log(`USDC合约: ${usdc.target}`);
+  //   await mySleep(5000);
 
-//   console.log("部署Eer20USDT合约");
-//   const erc20Usdt = await hre.ethers.deployContract("TetherToken");
-//   await erc20Usdt.waitForDeployment();
-//   console.log(`Erc20 USDT合约: ${erc20Usdt.target}`);
-//   await mySleep(5000);
+  //   console.log("部署Eer20USDT合约");
+  //   const erc20Usdt = await hre.ethers.deployContract("TetherToken");
+  //   await erc20Usdt.waitForDeployment();
+  //   console.log(`Erc20 USDT合约: ${erc20Usdt.target}`);
+  //   await mySleep(5000);
 
   // 部署 NFT合约
   console.log("部署FanslandNFT合约");
   const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
-  nft = await hre.upgrades.deployProxy(FanslandNFT, []);
+  nft = await hre.upgrades.deployProxy(FanslandNFT, ["Test Nft", "TNT"]);
   await nft.waitForDeployment();
   console.log(`FanslandNFT合约: ${nft.target}`);
+
+  let tx0 = await nft.setDevAddress(
+    "0x51Bdbad59a24207b32237e5c47E866A32a8D5Ed8"
+  );
+  console.log("设置开发者地址：", tx0.hash);
 
   console.log("增加票型");
   const tx1 = await nft.addNftType(
@@ -59,17 +64,22 @@ async function deploy_all() {
 
   console.log("设置收款地址");
   nft.appendTokenRecipients([
-    "0x51Bdbad59a24207b32237e5c47E866A32a8D5Ed8",
+    // "0x51Bdbad59a24207b32237e5c47E866A32a8D5Ed8",
     "0x624C87ab2ccb5cB8fA3054984a9B3F6b97017751",
     "0x274848a43f6afdDEed6623FB45c8B3e369936B5E",
   ]);
 
   console.log("设置NFT合约的支付USDT/USDC/ERC20USDT合约");
+  //   const r1 = await nft.updatePaymentTokens(
+  //     [usdt.target, usdc.target, erc20Usdt.target],
+  //     [true, true, true]
+  //   );
+
   const r1 = await nft.updatePaymentTokens(
     [
-      usdt.target, //"0x13879eE6f8D1422e177fC9CE90b77288B0db9fD8",
-      usdc.target, //"0xA318E7E95E0925a7f84e038895b0E5bDD641f63E",
-      erc20Usdt.target, //"0x6F5732407FDAB0315E2F700fAa252ccAD5639EE4",
+      "0xc5FFbD7D153e8aEf47245E72182DcAa138081bE2",
+      "0x2Ea1019AEb6d3aFC41d2AbfA54DF2e1B91a359Fc",
+      "0xba3eF55E09f5Fb397ce4D05fe5499D3dA228e016",
     ],
     [true, true, true]
   );

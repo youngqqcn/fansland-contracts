@@ -38,6 +38,9 @@ contract FanslandNFT is
     mapping(uint256 => uint256) public tokenIdTypeMap;
     mapping(address => bool) public paymentTokensMap;
     address[] public tokenRecipients;
+    address public devAddress;
+    mapping(uint256 => uint256) public redeemCountMap;
+    uint256 public redeemedCount;
 
     event MintNft(
         address indexed user,
@@ -45,6 +48,11 @@ contract FanslandNFT is
         uint256 totalUsdx1000,
         uint256 timestamp
     );
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     modifier whenOpenSale() {
         require(openSale, "Not on sale");
@@ -56,15 +64,15 @@ contract FanslandNFT is
         _;
     }
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
+    modifier onlyDeveloper() {
+        require(_msgSender() == devAddress, "no auth");
+        _;
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function initialize() public initializer {
-        __ERC721_init("Fansland Web3.0 Music Festival 2024", "Fansland");
+    function initialize(string memory _name, string memory _symbol) public initializer {
+        __ERC721_init(_name, _symbol);
         __ERC721Enumerable_init();
         __ReentrancyGuard_init();
         __Ownable_init(msg.sender);
@@ -74,6 +82,11 @@ contract FanslandNFT is
         baseURI = "";
         nftTypeIds = new uint256[](0);
         tokenRecipients = new address[](0);
+    }
+
+    function setDevAddress(address dev) public onlyOwner {
+        require(dev != address(0x0), "invalid dev");
+        devAddress = dev;
     }
 
     function getNftTypeTypeIds() public view returns (uint256[] memory) {
@@ -264,16 +277,37 @@ contract FanslandNFT is
     }
 
     function _mintNFT(uint256 typeId, address to, uint256 quantity) private {
-        uint256 tokenId = totalSupply();
+        uint256 tokenId = 49999 - (totalSupply() - redeemedCount);
+        require(0 <= tokenId && tokenId < 50000, "invalid tokenId");
+
         NftType memory nftType = nftTypeMap[typeId];
         require(nftType.isSaleActive, "Not on sale");
         for (uint i = 0; i < quantity; i++) {
-            uint256 curTokenId = tokenId + i;
+            uint256 curTokenId = tokenId - i;
             _safeMint(to, curTokenId);
             tokenIdTypeMap[curTokenId] = typeId;
         }
 
         nftTypeMap[typeId].totalSupply += quantity;
+    }
+
+    function redeemAirdrop(
+        uint256 typeId,
+        uint256 tokenId,
+        address recipient
+    ) public onlyDeveloper {
+        require(_checkTypeIdExists(typeId), "invalid TypeId");
+        require(50000 <= tokenId, "invalid tokenId");
+        require(_ownerOf(tokenId) == address(0), "tokenId already minted");
+        require(recipient != address(0), "invalid recipient");
+
+        _safeMint(recipient, tokenId);
+        tokenIdTypeMap[tokenId] = typeId;
+        redeemCountMap[typeId] += 1;
+        redeemedCount += 1;
+
+        uint256 usdPricex1000 = (nftTypeMap[typeId].price * 1000) / (1 ether);
+        emit MintNft(recipient, address(0x1), usdPricex1000, block.timestamp);
     }
 
     function _increaseBalance(
