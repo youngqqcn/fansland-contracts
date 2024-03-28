@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract FanslandNFT is
     Initializable,
@@ -18,6 +19,7 @@ contract FanslandNFT is
     UUPSUpgradeable
 {
     using SafeERC20 for IERC20;
+    using Strings for uint256;
 
     struct NftType {
         uint256 id;
@@ -41,6 +43,7 @@ contract FanslandNFT is
     address public devAddress;
     mapping(uint256 => uint256) public redeemCountMap;
     uint256 public redeemedCount;
+    mapping(uint256 => uint256) public typeIdTokenUriTypeMap;
 
     event MintNft(
         address indexed user,
@@ -71,7 +74,10 @@ contract FanslandNFT is
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    function initialize(string memory _name, string memory _symbol) public initializer {
+    function initialize(
+        string memory _name,
+        string memory _symbol
+    ) public initializer {
         __ERC721_init(_name, _symbol);
         __ERC721Enumerable_init();
         __ReentrancyGuard_init();
@@ -82,6 +88,13 @@ contract FanslandNFT is
         baseURI = "";
         nftTypeIds = new uint256[](0);
         tokenRecipients = new address[](0);
+    }
+
+    function setTypeIdTokenUriTypeMap(
+        uint256 id,
+        uint256 tokenUriType
+    ) public onlyOwner {
+        typeIdTokenUriTypeMap[id] = tokenUriType;
     }
 
     function setDevAddress(address dev) public onlyOwner {
@@ -370,10 +383,13 @@ contract FanslandNFT is
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721Upgradeable) returns (string memory) {
-        if (tokenId >= totalSupply()) {
-            revert ERC721NonexistentToken(tokenId);
+        if (typeIdTokenUriTypeMap[tokenIdTypeMap[tokenId]] > 0) {
+            return string.concat(
+                baseURI,
+                nftTypeMap[tokenIdTypeMap[tokenId]].uri,
+                tokenId.toString()
+            );
         }
-
         return string.concat(baseURI, nftTypeMap[tokenIdTypeMap[tokenId]].uri);
     }
 
