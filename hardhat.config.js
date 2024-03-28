@@ -101,6 +101,13 @@ module.exports = {
       accounts: [process.env.TESTNET_PRIVATE_KEY],
       gasPrice: 3_000_000_000,
     },
+    // TODO: polygon的amoy测试网, 4月份Mumbai测试网要下线，
+    // polygon_test: {
+    //     url: "https://polygon-amoy.g.alchemy.com/v2/OQybcIWTb5Kj5dyItDbvTKKO2HrgAehM",
+    //     chainId: 80002,
+    //     accounts: [process.env.TESTNET_PRIVATE_KEY],
+    //     gasPrice: 3_000_000_000,
+    //   },
     bsc_test: {
       url: "https://bsc-testnet.nodereal.io/v1/83d3d7d77ee04a2e948a5fdb0f9dd98e",
       chainId: 97,
