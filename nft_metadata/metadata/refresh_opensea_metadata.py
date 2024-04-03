@@ -11,7 +11,7 @@ def main():
         "X-API-KEY": "4ef00edc1db64d6fb2b1910cb9ec1003"
     }
 
-    i = 53
+    i = 0
     while i < 1000:
         try:
             url = f"https://api.opensea.io/api/v2/chain/bsc/contract/0xbf36ab3aed81bf8553b52c61041904d98ee882c2/nfts/{i}/refresh"

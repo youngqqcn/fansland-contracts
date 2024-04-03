@@ -32,19 +32,21 @@ module.exports = {
       url: "https://polygon-mainnet.g.alchemy.com/v2/YClzyACPRcIQOYKhvWrWMj3sXaQcdXnP",
       chainId: 137,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
-      gasPrice: 110_000_000_000,
+      gasPrice: 250_000_000_000,
+      //   minGasPrice: 200_000_000_000,
+      //   initialBaseFeePerGas: 200_000_000_000,
     },
     bsc_main: {
       url: "https://bsc-mainnet.nodereal.io/v1/562f81c9848e40b2b6040577a8eb9f41",
       chainId: 56,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
-      gasPrice: 3_000_000_000,
+      gasPrice: 1_000_000_000,
     },
     bsc_main_pro: {
-        url: "https://bsc-mainnet.nodereal.io/v1/562f81c9848e40b2b6040577a8eb9f41",
-        chainId: 56,
-        accounts: [process.env.PRO_PRIVATE_KEY],
-        gasPrice: 3_000_000_000,
+      url: "https://bsc-mainnet.nodereal.io/v1/562f81c9848e40b2b6040577a8eb9f41",
+      chainId: 56,
+      accounts: [process.env.PRO_PRIVATE_KEY],
+      gasPrice: 1_000_000_000,
     },
     eth_main: {
       url: "https://eth-mainnet.nodereal.io/v1/e40cb1b6dad04c28878c1829c0dacc43",
@@ -70,18 +72,18 @@ module.exports = {
       accounts: [process.env.MAINNET_PRIVATE_KEY],
     },
     polygon_zkevm_main: {
-    //   url: "https://polygonzkevm-mainnet.g.alchemy.com/v2/zC1XV6Bb4scVQc34WhVwtopZWKbymGBG",
-    // url: "https://go.getblock.io/4d2f611f6b814c66b60b116fa38f34e6",
+      //   url: "https://polygonzkevm-mainnet.g.alchemy.com/v2/zC1XV6Bb4scVQc34WhVwtopZWKbymGBG",
+      // url: "https://go.getblock.io/4d2f611f6b814c66b60b116fa38f34e6",
       url: "https://zkevm-rpc.com",
       chainId: 1101,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
-      gasPrice: 3_100_000_000
+      gasPrice: 3_100_000_000,
     },
     opbnb_main: {
       url: "https://opbnb-mainnet.nodereal.io/v1/86611fa959544efb9337d30c0dc7ab27",
       chainId: 204,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
-    //   gasPrice: 90_000
+      //   gasPrice: 90_000
     },
     base_main: {
       url: "https://base-mainnet.g.alchemy.com/v2/aAavxCh6gbB_lzEu3tDaS6k0q5czHNix",
@@ -202,7 +204,7 @@ module.exports = {
       linea_main: process.env.LINEA_API_KEY,
     },
     customChains: [
-        // https://docs.bscscan.com/v/opbnb/getting-started/endpoint-urls
+      // https://docs.bscscan.com/v/opbnb/getting-started/endpoint-urls
       {
         network: "opbnb_test",
         chainId: 5611,

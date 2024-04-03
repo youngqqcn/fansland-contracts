@@ -11,35 +11,44 @@ function mySleep(ms) {
 }
 
 async function deploy_all() {
-  console.log("部署USDT合约");
-  const usdt = await hre.ethers.deployContract("USDT");
-  await usdt.waitForDeployment();
-  console.log(`USDT合约: ${usdt.target}`);
+  //   console.log("部署USDT合约");
+  //   const usdt = await hre.ethers.deployContract("USDT");
+  //   await usdt.waitForDeployment();
+  //   console.log(`USDT合约: ${usdt.target}`);
+  //   //   await mySleep(5000);
+
+  //   console.log("部署USDC合约");
+  //   const usdc = await hre.ethers.deployContract("USDC");
+  //   await usdc.waitForDeployment();
+  //   console.log(`USDC合约: ${usdc.target}`);
   //   await mySleep(5000);
 
-  console.log("部署USDC合约");
-  const usdc = await hre.ethers.deployContract("USDC");
-  await usdc.waitForDeployment();
-  console.log(`USDC合约: ${usdc.target}`);
-  await mySleep(5000);
+  //   console.log("部署Eer20USDT合约");
+  //   const erc20Usdt = await hre.ethers.deployContract("TetherToken");
+  //   await erc20Usdt.waitForDeployment();
+  //   console.log(`Erc20 USDT合约: ${erc20Usdt.target}`);
+  //   await mySleep(5000);
 
-  console.log("部署Eer20USDT合约");
-  const erc20Usdt = await hre.ethers.deployContract("TetherToken");
-  await erc20Usdt.waitForDeployment();
-  console.log(`Erc20 USDT合约: ${erc20Usdt.target}`);
-  await mySleep(5000);
+  //   // 部署 NFT合约
+  //   console.log("部署FanslandNFT合约");
+  //   const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
+  //   nft = await hre.upgrades.deployProxy(FanslandNFT, ["Test Nft", "TNT"]);
+  //   await nft.waitForDeployment();
+  //   console.log(`FanslandNFT合约: ${nft.target}`);
 
-  // 部署 NFT合约
-  console.log("部署FanslandNFT合约");
-  const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
-  nft = await hre.upgrades.deployProxy(FanslandNFT, ["Test Nft", "TNT"]);
+  let nft = await hre.ethers.getContractAt(
+    "FanslandNFT",
+    "0x63564E7525985879e7C48B35BF0Be310A9Ba9867"
+  );
+
   await nft.waitForDeployment();
-  console.log(`FanslandNFT合约: ${nft.target}`);
+  console.log(`FanslandNFT contract: ${nft.target}`);
 
   let tx0 = await nft.setDevAddress(
-    "0x51Bdbad59a24207b32237e5c47E866A32a8D5Ed8"
+    "0xDEe74737Aa7C9E75cc782419D97DE18Eb2918e81"
   );
   console.log("设置开发者地址：", tx0.hash);
+  return;
 
   console.log("增加票型");
   const tx1 = await nft.addNftType(
@@ -103,7 +112,7 @@ async function deploy_all() {
     "0x624C87ab2ccb5cB8fA3054984a9B3F6b97017751",
     "0x274848a43f6afdDEed6623FB45c8B3e369936B5E",
   ]);
-    await mySleep(10000);
+  await mySleep(10000);
 
   console.log("设置NFT合约的支付USDT/USDC/ERC20USDT合约");
   const r1 = await nft.updatePaymentTokens(
