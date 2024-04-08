@@ -290,8 +290,7 @@ contract FanslandNFT is
     }
 
     function _mintNFT(uint256 typeId, address to, uint256 quantity) private {
-        uint256 tokenId = 49999 - (totalSupply() - redeemedCount);
-        require(0 <= tokenId && tokenId < 50000, "invalid tokenId");
+        uint256 tokenId = totalSupply();
 
         NftType memory nftType = nftTypeMap[typeId];
         require(nftType.isSaleActive, "Not on sale");
@@ -384,11 +383,12 @@ contract FanslandNFT is
         uint256 tokenId
     ) public view override(ERC721Upgradeable) returns (string memory) {
         if (typeIdTokenUriTypeMap[tokenIdTypeMap[tokenId]] > 0) {
-            return string.concat(
-                baseURI,
-                nftTypeMap[tokenIdTypeMap[tokenId]].uri,
-                tokenId.toString()
-            );
+            return
+                string.concat(
+                    baseURI,
+                    nftTypeMap[tokenIdTypeMap[tokenId]].uri,
+                    tokenId.toString()
+                );
         }
         return string.concat(baseURI, nftTypeMap[tokenIdTypeMap[tokenId]].uri);
     }
