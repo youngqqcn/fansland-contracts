@@ -295,7 +295,7 @@ contract FanslandNFT is
         NftType memory nftType = nftTypeMap[typeId];
         require(nftType.isSaleActive, "Not on sale");
         for (uint i = 0; i < quantity; i++) {
-            uint256 curTokenId = tokenId - i;
+            uint256 curTokenId = tokenId + i;
             _safeMint(to, curTokenId);
             tokenIdTypeMap[curTokenId] = typeId;
         }
