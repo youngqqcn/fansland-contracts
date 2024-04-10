@@ -64,6 +64,7 @@ module.exports = {
       url: "https://opt-mainnet.nodereal.io/v1/d7c30fd452f9473493d0cd9916621b6a",
       chainId: 10,
       accounts: [process.env.MAINNET_PRIVATE_KEY],
+      gasPrice: 10_000_000_000
     },
     avax_main: {
       // C-chain
@@ -85,6 +86,12 @@ module.exports = {
       accounts: [process.env.MAINNET_PRIVATE_KEY],
       //   gasPrice: 90_000
     },
+    opbnb_main_pro: {
+        url: "https://opbnb-mainnet.nodereal.io/v1/86611fa959544efb9337d30c0dc7ab27",
+        chainId: 204,
+        accounts: [process.env.PRO_PRIVATE_KEY],
+        //   gasPrice: 90_000
+      },
     base_main: {
       url: "https://base-mainnet.g.alchemy.com/v2/aAavxCh6gbB_lzEu3tDaS6k0q5czHNix",
       chainId: 8453,

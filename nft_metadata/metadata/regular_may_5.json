@@ -1,0 +1,27 @@
+{
+    "description": "Fansland is the first redefines music festival experience with innovative Web3.0 technology, art and music will be landed in Bangkok 2024. We're All Gonna Make It.",
+    "image": "ipfs://bafybeiblxag4pq6vttv54cdsxydntpseyrssei2fbo7w22v74uwfesng2i",
+    "name": "Regular 1-Day(5 May)",
+    "attributes": [
+        {
+            "trait_type": "Event Name",
+            "value": "Fansland Web3 Music Festival 2024"
+        },
+        {
+            "trait_type": "Ticket Type",
+            "value": "Regular 1-Day Ticket(5 May)"
+        },
+        {
+            "trait_type": "Event Time",
+            "value": "18:00(UTC+7) 5 May 2024"
+        },
+        {
+            "trait_type": "Event Location",
+            "value": "Impact Exhibition Hall 5-8, Bangkok, Thailand"
+        },
+        {
+            "trait_type": "Website",
+            "value": "fansland.io"
+        }
+    ]
+}
