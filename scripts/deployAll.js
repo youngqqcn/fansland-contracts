@@ -122,13 +122,130 @@ async function deploy_all() {
   //     await mySleep(5000);
   //   }
 
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1003",
+  //       "Platinum Package(4-5 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1003.json",
+  //       "100",
+  //       "50000000000000000000000", // 50000
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1004",
+  //       "Platinum Package(4 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1004.json",
+  //       "100",
+  //       "30000000000000000000000", // 30000
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1005",
+  //       "Platinum Package(5 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1005.json",
+  //       "100",
+  //       "30000000000000000000000", // 30000
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1006",
+  //       "Diamond Package(4-5 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1006.json",
+  //       "100",
+  //       "40000000000000000000000", // 40000
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1007",
+  //       "Diamond Package(4 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1007.json",
+  //       "100",
+  //       "25000000000000000000000", // 25000
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1008",
+  //       "Diamond Package(5 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1008.json",
+  //       "100",
+  //       "25000000000000000000000", // 25000
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1009",
+  //       "Gold Package(4-5 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1009.json",
+  //       "100",
+  //       "18000000000000000000000", // 18000
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1010",
+  //       "Gold Package(4 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1010.json",
+  //       "100",
+  //       "9800000000000000000000", // 9800
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "1011",
+  //       "Gold Package(5 May)",
+  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1011.json",
+  //       "100",
+  //       "9800000000000000000000", // 9800
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
   if (true) {
     const tx5 = await nft.addNftType(
-      "1003",
-      "Platinum Package(4-5 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1003.json",
-      "100",
-      "50000000000000000000000", // 50000
+      "5",
+      "Co-Host OKX WEB3(4-5 May)",
+      "ipfs://bafkreifuohissqu5nurx4ox5przs6kby36aqb5i2sa7y6nvxias3y3w2ka",
+      "200",
+      "128000000000000000000", // 128
       true
     );
     console.log(tx5.hash);
@@ -137,102 +254,11 @@ async function deploy_all() {
 
   if (true) {
     const tx5 = await nft.addNftType(
-      "1004",
-      "Platinum Package(4 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1004.json",
+      "6",
+      "Fansland X OneKey(4-5 May)",
+      "ipfs://bafkreihfkfo54flszruvqpgdwujp77exzzzrdpeopkd4rctslbnm7c64ze",
       "100",
-      "30000000000000000000000", // 30000
-      true
-    );
-    console.log(tx5.hash);
-    await mySleep(5000);
-  }
-
-  if (true) {
-    const tx5 = await nft.addNftType(
-      "1005",
-      "Platinum Package(5 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1005.json",
-      "100",
-      "30000000000000000000000", // 30000
-      true
-    );
-    console.log(tx5.hash);
-    await mySleep(5000);
-  }
-
-  if (true) {
-    const tx5 = await nft.addNftType(
-      "1006",
-      "Diamond Package(4-5 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1006.json",
-      "100",
-      "40000000000000000000000", // 40000
-      true
-    );
-    console.log(tx5.hash);
-    await mySleep(5000);
-  }
-
-  if (true) {
-    const tx5 = await nft.addNftType(
-      "1007",
-      "Diamond Package(4 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1007.json",
-      "100",
-      "25000000000000000000000", // 25000
-      true
-    );
-    console.log(tx5.hash);
-    await mySleep(5000);
-  }
-
-  if (true) {
-    const tx5 = await nft.addNftType(
-      "1008",
-      "Diamond Package(5 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1008.json",
-      "100",
-      "25000000000000000000000", // 25000
-      true
-    );
-    console.log(tx5.hash);
-    await mySleep(5000);
-  }
-
-  if (true) {
-    const tx5 = await nft.addNftType(
-      "1009",
-      "Gold Package(4-5 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1009.json",
-      "100",
-      "18000000000000000000000", // 18000
-      true
-    );
-    console.log(tx5.hash);
-    await mySleep(5000);
-  }
-
-  if (true) {
-    const tx5 = await nft.addNftType(
-      "1010",
-      "Gold Package(4 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1010.json",
-      "100",
-      "9800000000000000000000", // 9800
-      true
-    );
-    console.log(tx5.hash);
-    await mySleep(5000);
-  }
-
-  if (true) {
-    const tx5 = await nft.addNftType(
-      "1011",
-      "Gold Package(5 May)",
-      "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1011.json",
-      "100",
-      "9800000000000000000000", // 9800
+      "209000000000000000000", // 209
       true
     );
     console.log(tx5.hash);
