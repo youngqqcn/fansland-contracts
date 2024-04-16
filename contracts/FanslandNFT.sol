@@ -181,13 +181,13 @@ contract FanslandNFT is
         nftTypeIds.push(id);
     }
 
-    function updateNftTypeURI(uint8 id, string memory uri) public onlyOwner {
+    function updateNftTypeURI(uint256 id, string memory uri) public onlyOwner {
         require(_checkTypeIdExists(id), "Id not exists");
         nftTypeMap[id].uri = uri;
     }
 
     function updateNftTypeName(
-        uint8 id,
+        uint256 id,
         string memory typeName
     ) public onlyOwner {
         require(_checkTypeIdExists(id), "Id not exists");
@@ -196,7 +196,7 @@ contract FanslandNFT is
     }
 
     function updateNftTypeMaxSupply(
-        uint8 id,
+        uint256 id,
         uint256 maxSupply
     ) public onlyOwner {
         require(_checkTypeIdExists(id), "Id not exists");
@@ -207,12 +207,12 @@ contract FanslandNFT is
         nftTypeMap[id].maxSupply = maxSupply;
     }
 
-    function updateNftTypeSaleActive(uint8 id, bool sale) public onlyOwner {
+    function updateNftTypeSaleActive(uint256 id, bool sale) public onlyOwner {
         require(_checkTypeIdExists(id), "Id not exists");
         nftTypeMap[id].isSaleActive = sale;
     }
 
-    function updateNftTypePrice(uint8 id, uint256 price) public onlyOwner {
+    function updateNftTypePrice(uint256 id, uint256 price) public onlyOwner {
         require(_checkTypeIdExists(id), "Id not exists");
         require(price > 0 && price < 100_000_000 ether);
         nftTypeMap[id].price = price;
