@@ -54,52 +54,26 @@ async function deploy_all() {
   //     console.log(tx1.hash);
   //   }
 
+  // 新增票型
   //   if (true) {
-  //     const tx2 = await nft.addNftType(
-  //       "1",
-  //       "Advance 2-Day Ticket(4-5 May)",
-  //       "ipfs://bafkreibylfdxl3zk45qyrk2ovx6wld2wcu6qwk5awn4zfpwdscgvgvdxle",
-  //       "500", // 500张
-  //       "128000000000000000000", // 128
-  //       true
-  //     );
-  //     console.log(tx2.hash);
-  //     await mySleep(5000);
-  //   }
-
-  //   if (true) {
-  //     const tx3 = await nft.addNftType(
-  //       "2",
-  //       "Regular 1-Day Ticket (4 May)",
-  //       "ipfs://bafkreiedwy7gojsbodgnxqnyo3nlofdzxb7emlcn4kzzttykjnqgqukdbu",
+  //     const tx5 = await nft.addNftType(
   //       "1000",
-  //       "128000000000000000000", // 128
+  //       "Queen Package(4-5 May)",
+  //       "",
+  //       "10",
+  //       "100000000000000000000000", // 100000
   //       true
   //     );
-  //     console.log(tx3.hash);
+  //     console.log(tx5.hash);
   //     await mySleep(5000);
   //   }
-
-  //   if (true) {
-  //     const tx4 = await nft.addNftType(
-  //       "3",
-  //       "Regular 1-Day Ticket (5 May)",
-  //       "ipfs://bafkreifaspcgs6faf4dbpg7lwutzkkizxovlv2zqijsg7zassfobp3acpi",
-  //       "1000",
-  //       "128000000000000000000", // 128
-  //       true
-  //     );
-  //     console.log(tx4.hash);
-  //     await mySleep(5000);
-  //   }
-
   //   if (true) {
   //     const tx5 = await nft.addNftType(
-  //       "4",
-  //       "Regular 2-Day Ticket(4-5 May)",
-  //       "ipfs://bafkreieixd6ysvfe6avt7wc5yc5habj632zqzk2s4zh3uypjixch7fj55a",
-  //       "1000",
-  //       "169000000000000000000", // 169
+  //       "1001",
+  //       "Queen Package(5 May)",
+  //       "",
+  //       "10",
+  //       "60000000000000000000000", // 60000
   //       true
   //     );
   //     console.log(tx5.hash);
@@ -108,146 +82,91 @@ async function deploy_all() {
 
   //   if (true) {
   //     const tx5 = await nft.addNftType(
-  //       "1003",
-  //       "Platinum Package(4-5 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1003.json",
-  //       "100",
-  //       "50000000000000000000000", // 50000
+  //       "1001",
+  //       "Queen Package(4 May)",
+  //       "",
+  //       "10",
+  //       "60000000000000000000000", // 60000
   //       true
   //     );
   //     console.log(tx5.hash);
   //     await mySleep(5000);
   //   }
 
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "1004",
-  //       "Platinum Package(4 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1004.json",
-  //       "100",
-  //       "30000000000000000000000", // 30000
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
+  //   console.log("增加票型结束");
+  console.log("更新名字");
 
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "1005",
-  //       "Platinum Package(5 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1005.json",
-  //       "100",
-  //       "30000000000000000000000", // 30000
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
+  // 更新名字
+  if (true) {
+    let tx = await nft.updateNftTypeName("1006", "Silver Package(4-5 May)");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
 
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "1006",
-  //       "Diamond Package(4-5 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1006.json",
-  //       "100",
-  //       "40000000000000000000000", // 40000
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
+  if (true) {
+    let tx = await nft.updateNftTypeName("1007", "Silver Package(4 May)");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
 
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "1007",
-  //       "Diamond Package(4 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1007.json",
-  //       "100",
-  //       "25000000000000000000000", // 25000
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
+  if (true) {
+    let tx = await nft.updateNftTypeName("1008", "Silver Package(5 May)");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypeName("1002", "Queen Package(5 May)");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
 
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "1008",
-  //       "Diamond Package(5 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1008.json",
-  //       "100",
-  //       "25000000000000000000000", // 25000
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
-
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "1009",
-  //       "Gold Package(4-5 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1009.json",
-  //       "100",
-  //       "18000000000000000000000", // 18000
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
-
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "1010",
-  //       "Gold Package(4 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1010.json",
-  //       "100",
-  //       "9800000000000000000000", // 9800
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
-
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "1011",
-  //       "Gold Package(5 May)",
-  //       "ipfs://bafybeiaqz6l5zqmlqtvdh5bqq7vqef7bqgy5k4jpsjzq3twwaz4yyex44i/1011.json",
-  //       "100",
-  //       "9800000000000000000000", // 9800
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
-
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "5",
-  //       "Co-Host OKX WEB3(4-5 May)",
-  //       "ipfs://bafkreifuohissqu5nurx4ox5przs6kby36aqb5i2sa7y6nvxias3y3w2ka",
-  //       "200",
-  //       "128000000000000000000", // 128
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
-
-  //   if (true) {
-  //     const tx5 = await nft.addNftType(
-  //       "6",
-  //       "Fansland X OneKey(4-5 May)",
-  //       "ipfs://bafkreihfkfo54flszruvqpgdwujp77exzzzrdpeopkd4rctslbnm7c64ze",
-  //       "100",
-  //       "209000000000000000000", // 209
-  //       true
-  //     );
-  //     console.log(tx5.hash);
-  //     await mySleep(5000);
-  //   }
+  // 更新价格
+  console.log("更新价格");
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1003", "40000000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1004", "25000000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1005", "25000000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1006", "6000000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1007", "3999000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1008", "3999000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1009", "15000000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1010", "9800000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
+  if (true) {
+    let tx = await nft.updateNftTypePrice("1011", "9800000000000000000000");
+    console.log(tx.hash);
+    await mySleep(3000);
+  }
 
   // console.log("设置收款地址");
   // nft.appendTokenRecipients([

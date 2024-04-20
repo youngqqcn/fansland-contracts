@@ -14,7 +14,7 @@ async function upgrade_all() {
   const FanslandNFT = await hre.ethers.getContractFactory("FanslandNFT");
   let nft = await hre.upgrades.upgradeProxy(
     // "0xBCB16afD0dDD58c849F3521db53De8BE5dd6BEd1", // bsc_UAT
-    // "0xBf36aB3AeD81Bf8553B52c61041904d98Ee882C2", // bsc_main_PRO
+    "0xBf36aB3AeD81Bf8553B52c61041904d98Ee882C2", // bsc_main_PRO
     // "0x3130c0C931aA3FA07634283Bdf7200adC03C6DfB", // bsc_test
 
     // "0x2232878Aa2d7C2a975FE12EAA0DAA37b3692d380", // opBNB test
