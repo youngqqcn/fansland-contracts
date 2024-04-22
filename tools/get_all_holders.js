@@ -6,6 +6,8 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 const axios = require("axios");
+const fs = require("fs");
+const readline = require("readline");
 
 function mySleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,7 +32,49 @@ async function get_qrcode(token_id, holder) {
     });
 }
 
+async function readLinesToSet(filePath) {
+  return new Promise((resolve, reject) => {
+    const fileStream = fs.createReadStream(filePath);
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    });
+
+    const uniqueLines = new Set();
+
+    rl.on("line", (line) => {
+      let s = line.trimStart().trimEnd().toLowerCase();
+      // 去掉注释的行
+      if (s.length > 0 && !s.startsWith("//")) {
+        uniqueLines.add(s);
+      }
+    });
+
+    rl.on("close", () => {
+      resolve(uniqueLines);
+    });
+
+    rl.on("error", (err) => {
+      reject(err);
+    });
+  });
+}
+
 async function get_all_holders() {
+  // 获取内部地址
+  console.log("获取内部地址");
+  const path = "/home/yqq/fansland/fansland-contracts/tools/inner_address.txt";
+  let inner_address = await readLinesToSet(path)
+    .then((sets) => {
+      return sets;
+    })
+    .catch((err) => {
+      console.error(err);
+      return new Set();
+    });
+  //   console.log(inner_address.size);
+  //   return;
+
   // 部署 NFT合约
   console.log("获取所有holders");
 
@@ -40,7 +84,7 @@ async function get_all_holders() {
   );
 
   let typeMap = {
-    0: "Early Bird 2-Day Ticket( 4-5 May)",
+    0: "Early Bird 2-Day Ticket(4-5 May)",
     1: "Advance 2-Day Ticket(4-5 May)",
     2: "Regular 1-Day Ticket (4 May)",
     3: "Regular 1-Day Ticket (5 May)",
@@ -50,8 +94,16 @@ async function get_all_holders() {
   };
 
   // 获取holders
-  for (let i = 974; i < 1503; i++) {
+  for (let i = 0; i < 1503; i++) {
     let holder = await nft.ownerOf(i);
+    holder = holder.toLowerCase();
+
+    // 如果是内部地址则跳过
+    if (inner_address.has(holder)) {
+      //   console.log(holder, "是内部地址, 跳过");
+      continue;
+    }
+
     let typeId = await nft.tokenIdTypeMap(i);
     let ticketType = typeMap[typeId.toString()];
     let qrcode = await get_qrcode(i, holder);
