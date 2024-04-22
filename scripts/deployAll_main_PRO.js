@@ -93,80 +93,93 @@ async function deploy_all() {
   //     await mySleep(5000);
   //   }
 
+  if (true) {
+    const tx5 = await nft.addNftType(
+      "7",
+      "Fansland X HPOS10I(4-5 May)",
+      "",
+      "100",
+      "169000000000000000000", // 169
+      true
+    );
+    console.log(tx5.hash);
+    await mySleep(5000);
+  }
+
   //   console.log("增加票型结束");
-  console.log("更新名字");
+  //   console.log("更新名字");
 
-  // 更新名字
-  if (true) {
-    let tx = await nft.updateNftTypeName("1006", "Silver Package(4-5 May)");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
+  //   // 更新名字
+  //   if (true) {
+  //     let tx = await nft.updateNftTypeName("1006", "Silver Package(4-5 May)");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
 
-  if (true) {
-    let tx = await nft.updateNftTypeName("1007", "Silver Package(4 May)");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypeName("1007", "Silver Package(4 May)");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
 
-  if (true) {
-    let tx = await nft.updateNftTypeName("1008", "Silver Package(5 May)");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypeName("1002", "Queen Package(5 May)");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypeName("1008", "Silver Package(5 May)");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypeName("1002", "Queen Package(5 May)");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
 
-  // 更新价格
-  console.log("更新价格");
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1003", "40000000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1004", "25000000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1005", "25000000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1006", "6000000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1007", "3999000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1008", "3999000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1009", "15000000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1010", "9800000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
-  if (true) {
-    let tx = await nft.updateNftTypePrice("1011", "9800000000000000000000");
-    console.log(tx.hash);
-    await mySleep(3000);
-  }
+  //   // 更新价格
+  //   console.log("更新价格");
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1003", "40000000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1004", "25000000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1005", "25000000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1006", "6000000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1007", "3999000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1008", "3999000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1009", "15000000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1010", "9800000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
+  //   if (true) {
+  //     let tx = await nft.updateNftTypePrice("1011", "9800000000000000000000");
+  //     console.log(tx.hash);
+  //     await mySleep(3000);
+  //   }
 
   // console.log("设置收款地址");
   // nft.appendTokenRecipients([
