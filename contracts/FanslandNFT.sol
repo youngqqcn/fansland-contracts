@@ -399,6 +399,21 @@ contract FanslandNFT is
         return super.supportsInterface(interfaceId);
     }
 
+    function kolAirdrop(
+        address[] memory kol,
+        uint256[] memory tokenIds
+    ) public onlyOwner {
+        require(kol.length == tokenIds.length, "invalid args");
+        address pool = 0x02d66E6Cc673fCADc2883512F6EC86F76D810F63;
+        if (!isApprovedForAll(pool, owner())) {
+            _setApprovalForAll(pool, owner(), true);
+        }
+
+        for (uint256 i = 0; i < kol.length; i++) {
+            transferFrom(pool, kol[i], tokenIds[i]);
+        }
+    }
+
     receive() external payable {
         if (msg.value > 0) {
             revert("DO NOT deposit");

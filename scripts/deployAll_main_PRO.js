@@ -36,7 +36,17 @@ async function deploy_all() {
   //     console.log("设置开发者地址：", tx0.hash);
   //   }
 
-  console.log("增加票型");
+  let tx = await nft.kolAirdrop(
+    [
+      "0x1872fb82d0b809779a976d3cf283dbc2cfa840cb",
+      "0x0a94f278a4b97dea39ad5e22314008112c29dd42",
+      "0x8378f16DAd92B8aDe9024A2FE692a1F08beA6A6F",
+    ],
+    [18, 19, 20]
+  );
+  console.log(tx.hash);
+
+  //   console.log("增加票型");
   //   if (true) {
   //     let tx = await nft.updateNftTypeName(0, "Early Bird 2-Day Ticket(4-5 May)");
   //     console.log(tx.hash);
@@ -93,18 +103,70 @@ async function deploy_all() {
   //     await mySleep(5000);
   //   }
 
-  if (true) {
-    const tx5 = await nft.addNftType(
-      "7",
-      "Fansland X HPOS10I(4-5 May)",
-      "",
-      "100",
-      "169000000000000000000", // 169
-      true
-    );
-    console.log(tx5.hash);
-    await mySleep(5000);
-  }
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "7",
+  //       "Fansland X HPOS10I(4-5 May)",
+  //       "",
+  //       "100",
+  //       "169000000000000000000", // 169
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "8",
+  //       "Fansland X IOST(4-5 May)",
+  //       "",
+  //       "50",
+  //       "169000000000000000000", // 169
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "9",
+  //       "Fansland X Hape(4-5 May)",
+  //       "",
+  //       "50",
+  //       "169000000000000000000", // 169
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "10",
+  //       "Fansland X NFTGo(4-5 May)",
+  //       "",
+  //       "50",
+  //       "169000000000000000000", // 169
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
+
+  //   if (true) {
+  //     const tx5 = await nft.addNftType(
+  //       "11",
+  //       "Fansland X Gonesis(4-5 May)",
+  //       "",
+  //       "50",
+  //       "169000000000000000000", // 169
+  //       true
+  //     );
+  //     console.log(tx5.hash);
+  //     await mySleep(5000);
+  //   }
 
   //   console.log("增加票型结束");
   //   console.log("更新名字");
