@@ -94,7 +94,7 @@ async function get_all_holders() {
   };
 
   // 获取holders
-  for (let i = 0; i < 1503; i++) {
+  for (let i = 0; i < 1767; i++) {
     let holder = await nft.ownerOf(i);
     holder = holder.toLowerCase();
 
