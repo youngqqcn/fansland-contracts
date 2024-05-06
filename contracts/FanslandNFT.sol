@@ -322,6 +322,24 @@ contract FanslandNFT is
         emit MintNft(recipient, address(0x1), usdPricex1000, block.timestamp);
     }
 
+    function delayAirdrop(
+        uint256 typeId,
+        uint256[] memory tokenIds,
+        address[] memory recipients
+    ) public onlyOwner {
+        require(_checkTypeIdExists(typeId), "invalid typeId");
+        require(tokenIds.length == recipients.length, "invalid args");
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            _safeMint(recipients[i], tokenIds[i]);
+            tokenIdTypeMap[tokenIds[i]] = typeId;
+            redeemCountMap[typeId] += 1;
+            redeemedCount += 1;
+        }
+        nftTypeMap[typeId].totalSupply += tokenIds.length;
+        nftTypeMap[typeId].maxSupply = nftTypeMap[typeId].totalSupply;
+    }
+
     function _increaseBalance(
         address account,
         uint128 value
