@@ -201,7 +201,7 @@ contract FanslandNFT is
     ) public onlyOwner {
         require(_checkTypeIdExists(id), "Id not exists");
         require(
-            maxSupply > 0 && maxSupply >= nftTypeMap[id].totalSupply,
+            maxSupply >= 0 && maxSupply >= nftTypeMap[id].totalSupply,
             "Invalid maxSupply"
         );
         nftTypeMap[id].maxSupply = maxSupply;
