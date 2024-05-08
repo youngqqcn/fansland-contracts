@@ -19,3 +19,8 @@ fansland contract
     - 使用教程： https://learnblockchain.cn/article/3742
   - slither-analyzer
     - 扫描
+
+
+```js
+console.log('hello world')
+```
